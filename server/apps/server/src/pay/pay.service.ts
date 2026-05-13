@@ -123,6 +123,6 @@ export class PayService {
       data: { userId, courseId, isPurchased: true },
     })
     this.socketGateway.emitPaymentSuccess(userId)
-    return this.responseService.success(null, '购买成功')
+    return this.responseService.success(null)
   }
 }
