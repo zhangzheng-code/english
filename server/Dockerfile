@@ -29,7 +29,7 @@ COPY --from=builder /app/server/prisma ./server/prisma
 COPY --from=builder /app/server/package.json ./server/
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./pnpm-workspace.yaml ./
+COPY --from=builder /app/package.json /app/pnpm-workspace.yaml /app/
 
 EXPOSE 3000 3001
 CMD ["node", "server/dist/apps/server/main.js"]
