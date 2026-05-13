@@ -1,0 +1,146 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: deploy
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: english
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U deploy -d english"]
+      interval: 5s
+      timeout: 3s
+    networks:
+      - internal
+    restart: always
+
+  postgres-langchain:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: deploy
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: langchain
+    volumes:
+      - pgdata-ai:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U deploy -d langchain"]
+      interval: 5s
+      timeout: 3s
+    networks:
+      - internal
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+    networks:
+      - internal
+    restart: always
+
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - minio-data:/data
+    networks:
+      - internal
+    restart: always
+
+  backend:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    command: node server/dist/apps/server/main.js
+    depends_on:
+      postgres: { condition: service_healthy }
+      postgres-langchain: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://deploy:${DB_PASSWORD}@postgres:5432/english
+      AI_DATABASE_URL: postgresql://deploy:${DB_PASSWORD}@postgres-langchain:5432/langchain
+      REDIS_HOST: redis
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: "0"
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_BUCKET: avatar
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      DEEPSEEK_API_MODEL: deepseek-chat
+      DEEPSEEK_REASONER_API_MODEL: deepseek-reasoner
+      BOCHA_SEARCH_URL: https://api.bochaai.com/v1/web-search
+      BOCHA_API_KEY: ${BOCHA_API_KEY}
+      ALIPAY_APP_ID: ${ALIPAY_APP_ID}
+      ALIPAY_GATEWAY: ${ALIPAY_GATEWAY}
+      ALIPAY_PUBLIC_KEY: ${ALIPAY_PUBLIC_KEY}
+      ALIPAY_PRIVATE_KEY: ${ALIPAY_PRIVATE_KEY}
+      ALIPAY_NOTIFY_URL: ${ALIPAY_NOTIFY_URL}
+      EMAIL_HOST: ${EMAIL_HOST}
+      EMAIL_PORT: ${EMAIL_PORT}
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      EMAIL_FROM: ${EMAIL_FROM}
+      EMAIL_USE_SSL: "1"
+      SECRET_KEY: ${SECRET_KEY}
+    networks:
+      - internal
+    restart: always
+
+  ai:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    command: node server/dist/apps/ai/main.js
+    depends_on:
+      redis: { condition: service_healthy }
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://deploy:${DB_PASSWORD}@postgres:5432/english
+      AI_DATABASE_URL: postgresql://deploy:${DB_PASSWORD}@postgres-langchain:5432/langchain
+      REDIS_HOST: redis
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: "0"
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      DEEPSEEK_API_MODEL: deepseek-chat
+      DEEPSEEK_REASONER_API_MODEL: deepseek-reasoner
+      BOCHA_SEARCH_URL: https://api.bochaai.com/v1/web-search
+      BOCHA_API_KEY: ${BOCHA_API_KEY}
+    networks:
+      - internal
+    restart: always
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - ai
+    networks:
+      - internal
+    restart: always
+
+volumes:
+  pgdata:
+  pgdata-ai:
+  redis-data:
+  minio-data:
+
+networks:
+  internal:
+    driver: bridge
