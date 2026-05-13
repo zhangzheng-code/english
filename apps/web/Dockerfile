@@ -6,7 +6,8 @@ COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .npmrc ./
 COPY packages/ ./packages/
 COPY apps/web/ ./apps/web/
 COPY apps/tracker/ ./apps/tracker/
-RUN pnpm install --no-frozen-lockfile --config.onlyBuiltDependencies='["esbuild","vue-demi"]'
+RUN pnpm install --no-frozen-lockfile --ignore-scripts
+RUN pnpm rebuild esbuild vue-demi
 RUN pnpm --filter @en/tracker build
 RUN pnpm --filter @en/web build
 
