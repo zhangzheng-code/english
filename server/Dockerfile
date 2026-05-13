@@ -14,6 +14,7 @@ RUN pnpm install --no-frozen-lockfile --ignore-scripts
 RUN pnpm rebuild esbuild vue-demi
 
 COPY . .
+ENV DATABASE_URL="postgresql://u:p@localhost:5432/db"
 RUN cd server && npx prisma generate && cd ..
 RUN pnpm --filter @en/tracker build
 RUN pnpm --filter @en/server build
