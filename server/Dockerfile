@@ -23,13 +23,10 @@ FROM node:22-alpine AS runner
 WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-COPY --from=builder /app/server/dist ./server/dist
-COPY --from=builder /app/server/node_modules ./server/node_modules
-COPY --from=builder /app/server/prisma ./server/prisma
-COPY --from=builder /app/server/package.json ./server/
-COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json /app/pnpm-workspace.yaml /app/
+COPY --from=builder /app/server /app/server
+COPY --from=builder /app/node_modules /app/node_modules
+COPY --from=builder /app/package.json /app/package.json
+COPY --from=builder /app/pnpm-workspace.yaml /app/pnpm-workspace.yaml
 
 EXPOSE 3000 3001
 CMD ["node", "server/dist/apps/server/main.js"]
