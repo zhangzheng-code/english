@@ -58,6 +58,7 @@ export class PayService {
           product_code: 'FAST_INSTANT_TRADE_PAY', //产品编码
           time_expire: dateTime.format('YYYY-MM-DD HH:mm:ss'),
         },
+        return_url: `${this.configService.get<string>('ALIPAY_NOTIFY_URL')!}`,
         notify_url: `${this.configService.get<string>('ALIPAY_NOTIFY_URL')!}/api/v1/pay/notify`,
       })
       return {
@@ -69,31 +70,59 @@ export class PayService {
   }
 
   async notify(req: Request) {
-    this.prismaService.$transaction(async (tx) => {
-      //1.更新支付库 支付时间 + 支付宝交易号 + 支付状态
-      const paymentRecord = await tx.paymentRecord.update({
-        where: {
-          outTradeNo: req.body.out_trade_no, //拿到了订单编号
-        },
-        data: {
-          tradeNo: req.body.trade_no, //拿到了支付宝交易号
-          tradeStatus: TradeStatus.TRADE_SUCCESS, //拿到了支付状态
-          sendPayTime: dayjs(req.body.gmt_payment).toDate(), //拿到了支付时间
-        },
+    try {
+      await this.prismaService.$transaction(async (tx) => {
+        //1.更新支付库 支付时间 + 支付宝交易号 + 支付状态
+        const paymentRecord = await tx.paymentRecord.update({
+          where: {
+            outTradeNo: req.body.out_trade_no, //拿到了订单编号
+          },
+          data: {
+            tradeNo: req.body.trade_no, //拿到了支付宝交易号
+            tradeStatus: TradeStatus.TRADE_SUCCESS, //拿到了支付状态
+            sendPayTime: dayjs(req.body.gmt_payment).toDate(), //拿到了支付时间
+          },
+        })
+        //2.创建我的课程
+        const body = JSON.parse(req.body.body) as { courseId: string, userId: string };
+        await tx.courseRecord.create({
+          data: {
+            userId: body.userId, //拿到了用户id
+            courseId: body.courseId, //拿到了课程id
+            isPurchased: true, //是否购买
+            paymentRecordId: paymentRecord.id, //拿到了支付记录id
+          },
+        })
+        //加一个通知前端socket
+        this.socketGateway.emitPaymentSuccess(body.userId);
       })
-      //2.创建我的课程
-      const body = JSON.parse(req.body.body) as { courseId: string, userId: string };
-      await tx.courseRecord.create({
-        data: {
-          userId: body.userId, //拿到了用户id
-          courseId: body.courseId, //拿到了课程id
-          isPurchased: true, //是否购买
-          paymentRecordId: paymentRecord.id, //拿到了支付记录id
-        },
-      })
-      //加一个通知前端socket
-      this.socketGateway.emitPaymentSuccess(body.userId);
+      return 'success'
+    } catch (error) {
+      return 'fail'
+    }
+  }
+
+  async verify(courseId: string, userId: string) {
+    const record = await this.prismaService.courseRecord.findFirst({
+      where: {
+        userId,
+        courseId,
+        paymentRecord: { tradeStatus: TradeStatus.TRADE_SUCCESS }
+      }
     })
-    return true
+    return this.responseService.success({ purchased: !!record })
+  }
+
+  async manualComplete(courseId: string, userId: string) {
+    const exists = await this.prismaService.courseRecord.findFirst({
+      where: { userId, courseId }
+    })
+    if (exists) return this.responseService.error(null, '已购买过该课程')
+
+    await this.prismaService.courseRecord.create({
+      data: { userId, courseId, isPurchased: true },
+    })
+    this.socketGateway.emitPaymentSuccess(userId)
+    return this.responseService.success(null, '购买成功')
   }
 }

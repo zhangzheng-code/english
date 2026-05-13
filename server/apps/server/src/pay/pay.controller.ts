@@ -19,4 +19,16 @@ export class PayController {
     return this.payService.notify(req);
   }
 
+  @UseGuards(AuthGuard)
+  @Post('verify')
+  verify(@Body('courseId') courseId: string, @Req() req: Request) {
+    return this.payService.verify(courseId, req.user.userId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('manual-complete')
+  manualComplete(@Body('courseId') courseId: string, @Req() req: Request) {
+    return this.payService.manualComplete(courseId, req.user.userId);
+  }
+
 }

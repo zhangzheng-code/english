@@ -55,6 +55,13 @@
                             {{ isPay ? '支付中...' : '确认支付' }}
                         </button>
                     </div>
+                    <div v-if="isPay" class="px-6 pb-4 text-center">
+                        <button type="button"
+                            class="text-sm text-indigo-500 hover:text-indigo-700 underline cursor-pointer"
+                            @click="onManualComplete">
+                            已支付？点此确认
+                        </button>
+                    </div>
                 </div>
             </div>
         </Transition>
@@ -63,35 +70,57 @@
 
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, onUnmounted } from 'vue'
 import type { Course } from '@en/common/course';
 import { ElMessage } from 'element-plus';
 import { getFileUrl } from '@/apis';
 import type { CreatePayDto } from '@en/common/pay';
-import { createPay } from '@/apis/pay';
+import { createPay, verifyPay, manualCompletePay } from '@/apis/pay';
 import { useSocket } from '@/hooks/useSocket';
 const { getSocket } = useSocket();
+const emit = defineEmits<{ paid: [] }>();
 const modelValue = defineModel<boolean>('modelValue', { required: true });
 const props = defineProps<{
     course: Course | null;
 }>();
 const isPay = ref(false); //是否支付中
 const timeExpire = ref(0); //支付剩余时间
+let pollTimer: ReturnType<typeof setInterval> | null = null;
+
+const onPaid = () => {
+    ElMessage.success({ message: '支付成功', duration: 10000 });
+    emit('paid');
+    close();
+}
 
 watch(modelValue, (newVal) => {
     const socket = getSocket();
     if (newVal) {
-        socket?.on('paymentSuccess', () => {
-            ElMessage.success({
-                message: '支付成功',
-                duration: 10000 //10秒后自动关闭
-            });
-            close();
-        });
+        socket?.on('paymentSuccess', onPaid);
     } else {
-        socket?.off('paymentSuccess');
+        socket?.off('paymentSuccess', onPaid);
+        stopPoll();
     }
 })
+
+const startPoll = () => {
+    if (!props.course) return;
+    stopPoll();
+    pollTimer = setInterval(async () => {
+        try {
+            const res = await verifyPay(props.course!.id);
+            if (res.success && res.data.purchased) {
+                onPaid();
+            }
+        } catch { }
+    }, 2000)
+}
+
+const stopPoll = () => {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+}
+
+onUnmounted(stopPoll);
 
 const imageSrc = (url: string) => getFileUrl(url)
 
@@ -109,6 +138,17 @@ const close = () => {
     isPay.value = false; //重置支付状态
 }
 
+//手动确认已支付（frp隧道不可用时后备）
+const onManualComplete = async () => {
+    if (!props.course) return
+    const res = await manualCompletePay(props.course.id)
+    if (res.success) {
+        onPaid()
+    } else {
+        ElMessage.error(res.message || '确认失败')
+    }
+}
+
 //点击确认支付
 const onConfirm = async () => {
     const body: CreatePayDto = {
@@ -122,6 +162,7 @@ const onConfirm = async () => {
         isPay.value = true; //设置支付中
         window.open(res.data.payUrl, '_blank'); //打开支付页面
         timeExpire.value = res.data.timeExpire; //设置倒计时
+        startPoll(); //开始轮询支付结果
     } else {
         ElMessage.error(res.message); //提示错误
         isPay.value = false; //重置支付状态

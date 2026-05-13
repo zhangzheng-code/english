@@ -41,7 +41,7 @@
             </div>
             <el-empty v-if="list.length === 0" description="暂无课程" />
         </div>
-        <CoursePay v-model="payVisible" :course="selectedCourse" />
+        <CoursePay v-model="payVisible" :course="selectedCourse" @paid="onPaid" />
     </div>
 </template>
 <script setup lang="ts">
@@ -82,6 +82,10 @@ const openPay = async (course: Course) => {
 
 }
 const imageSrc = (url: string) => getFileUrl(url)
+const onPaid = () => {
+    payVisible.value = false;
+    if (currentTab.value === 'my') getList();
+}
 onMounted(() => {
     getList();
 })
