@@ -6,7 +6,7 @@ COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY packages/ ./packages/
 COPY apps/web/ ./apps/web/
 COPY apps/tracker/ ./apps/tracker/
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 RUN pnpm --filter @en/tracker build
 RUN pnpm --filter @en/web build
 
