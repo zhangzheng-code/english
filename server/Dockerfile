@@ -10,7 +10,7 @@ COPY server/apps/ai/tsconfig*.json ./server/apps/ai/
 COPY server/libs/shared/tsconfig*.json ./server/libs/shared/
 COPY apps/tracker/package.json ./apps/tracker/
 COPY apps/web/package.json ./apps/web/
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --no-frozen-lockfile --config.onlyBuiltDependencies='["esbuild","vue-demi"]'
 
 COPY . .
 RUN cd server && npx prisma generate && cd ..
