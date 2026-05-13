@@ -10,5 +10,8 @@
 		"concurrently": "^9.2.1",
 		"dayjs": "^1.11.19",
 		"md5": "^2.3.0"
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": ["esbuild", "vue-demi"]
 	}
 }
