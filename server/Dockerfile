@@ -18,6 +18,7 @@ ENV DATABASE_URL="postgresql://u:p@localhost:5432/db"
 RUN cd server && npx prisma generate && cd ..
 RUN pnpm --filter @en/tracker build
 RUN pnpm --filter @en/server build
+RUN cd server && npx nest build ai
 
 FROM node:22-alpine AS runner
 WORKDIR /app
