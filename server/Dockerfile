@@ -24,6 +24,7 @@ WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 COPY --from=builder /app/server /app/server
+COPY --from=builder /app/packages /app/packages
 COPY --from=builder /app/node_modules /app/node_modules
 COPY --from=builder /app/package.json /app/package.json
 COPY --from=builder /app/pnpm-workspace.yaml /app/pnpm-workspace.yaml
