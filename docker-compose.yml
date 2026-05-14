@@ -59,7 +59,7 @@ services:
     build:
       context: .
       dockerfile: server/Dockerfile
-    command: node server/dist/apps/server/main.js
+    command: node server/dist/apps/server/apps/server/src/main.js
     depends_on:
       postgres: { condition: service_healthy }
       postgres-langchain: { condition: service_healthy }
@@ -100,7 +100,7 @@ services:
     build:
       context: .
       dockerfile: server/Dockerfile
-    command: node server/dist/apps/ai/main.js
+    command: node server/dist/apps/ai/apps/ai/src/main.js
     depends_on:
       redis: { condition: service_healthy }
     environment:
