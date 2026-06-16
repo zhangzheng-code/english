@@ -40,6 +40,7 @@
     "alipay-sdk": "^4.14.0",
     "bullmq": "^5.70.4",
     "dotenv": "^17.2.3",
+    "iconv-lite": "^0.7.2",
     "knex": "^3.2.6",
     "langchain": "^1.2.18",
     "marked": "^17.0.1",
@@ -103,5 +104,8 @@
     "moduleNameMapper": {
       "^@libs/shared(|/.*)$": "<rootDir>/libs/shared/src/$1"
     }
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }

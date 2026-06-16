@@ -2,3 +2,11 @@ packages:
   - 'apps/*'
   - 'server'
   - 'packages/*'
+allowBuilds:
+  '@nestjs/core': true
+  '@prisma/engines': true
+  esbuild: true
+  msgpackr-extract: true
+  prisma: true
+  unrs-resolver: true
+  vue-demi: true

@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker exec *)",
+      "Bash(PGPASSWORD=123456 psql -h localhost -U postgres -d english -c \"SELECT 1;\")",
+      "Bash(node -e \"const pg = require\\('pg'\\); const client = new pg.Client\\({connectionString: 'postgresql://postgres:123456@localhost:5432/english'}\\); client.connect\\(\\).then\\(\\(\\) => { console.log\\('Connected OK'\\); return client.query\\('SELECT 1'\\); }\\).then\\(r => { console.log\\('Query OK:', r.rows\\); return client.end\\(\\); }\\).catch\\(e => console.error\\('Error:', e.message\\)\\);\")",
+      "Bash(grep -v \"^$\")",
+      "Bash(node -e \"require\\('dotenv/config'\\); console.log\\('DATABASE_URL:', process.env.DATABASE_URL\\);\")",
+      "Bash(npx tsx -e ' *)",
+      "Bash(timeout 10 npx tsx -e ' *)",
+      "Bash(npx tsx *)",
+      "Bash(node -e ' *)",
+      "Bash(docker network *)",
+      "Bash(docker port *)",
+      "Bash(tasklist /FI \"PID eq 5920\" /FO CSV)",
+      "Bash(tasklist /FI \"PID eq 45336\" /FO CSV)",
+      "Bash(cmd.exe /c \"tasklist /FI \\\\\"PID eq 5920\\\\\" /FO CSV\")",
+      "Bash(cmd.exe /c \"tasklist | findstr postgres\")",
+      "Bash(cmd.exe /c \"netstat -ano | findstr :5432\")",
+      "Bash(powershell.exe -Command \"Get-Process -Id 45336 | Select-Object Id,ProcessName\")",
+      "Bash(powershell.exe -Command \"Get-Process -Id 5920 | Select-Object Id,ProcessName\")",
+      "Bash(docker stop *)",
+      "Bash(docker rm *)",
+      "Bash(pnpm --filter @en/server exec tsx prisma/seed.ts)",
+      "Bash(powershell.exe -Command \"Get-Process -Id 16956 | Select-Object Id,ProcessName\")",
+      "Bash(powershell.exe -Command \"Stop-Process -Id 16956 -Force\")",
+      "Bash(powershell.exe -Command \"Stop-Process -Id 37028,35104 -Force\")",
+      "Bash(powershell.exe -Command \"Start-Process 'C:\\\\Program Files\\\\Docker\\\\Docker\\\\Docker Desktop.exe'\")",
+      "Bash(powershell.exe -Command \"Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force\")",
+      "Bash(powershell.exe -Command \"Get-Process tsx -ErrorAction SilentlyContinue | Select-Object Id,CPU,WorkingSet64\")"
+    ]
+  }
+}

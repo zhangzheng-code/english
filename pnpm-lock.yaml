@@ -194,6 +194,9 @@ importers:
       dotenv:
         specifier: ^17.2.3
         version: 17.4.2
+      iconv-lite:
+        specifier: ^0.7.2
+        version: 0.7.2
       knex:
         specifier: ^3.2.6
         version: 3.2.10(pg@8.20.0)

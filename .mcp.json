@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "codegraph": {
+      "command": "npx",
+      "args": ["@stupidloud/codegraph", "serve", "--mcp"]
+    }
+  }
+}
