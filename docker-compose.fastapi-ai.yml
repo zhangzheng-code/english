@@ -1,0 +1,57 @@
+# ============================================================
+# FastAPI AI 微服务 — Docker Compose 附加配置
+# ============================================================
+# 使用方式（与主 compose 叠加）：
+#   docker compose -f docker-compose.yml -f docker-compose.fastapi-ai.yml up -d
+#
+# 灰度期间两个 AI 服务并行运行：
+#   - ai (NestJS):    内部 3001 → 外部 3001（旧）
+#   - fastapi-ai:     内部 3001 → 外部 3002（新）
+#
+# 全量切换后：
+#   1. 停掉 ai 服务
+#   2. 将 fastapi-ai 的 ports 改为 "3001:3001"
+#   3. 更新 nginx.conf 指向 fastapi-ai:3001
+# ============================================================
+
+services:
+  fastapi-ai:
+    build:
+      context: .
+      dockerfile: server-ai/Dockerfile
+    ports:
+      - "3002:3001"   # 灰度期间用 3002 对外，避免与旧 ai 服务冲突
+    depends_on:
+      postgres: { condition: service_healthy }
+      postgres-langchain: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    environment:
+      # 数据库
+      DATABASE_URL: postgresql+asyncpg://deploy:${DB_PASSWORD}@postgres:5432/english
+      LANGCHAIN_DATABASE_URL: postgresql://deploy:${DB_PASSWORD}@postgres-langchain:5432/langchain
+      # DeepSeek
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      DEEPSEEK_API_MODEL: ${DEEPSEEK_API_MODEL:-deepseek-chat}
+      DEEPSEEK_REASONER_API_MODEL: ${DEEPSEEK_REASONER_API_MODEL:-deepseek-reasoner}
+      # 博查搜索
+      BOCHA_SEARCH_URL: https://api.bochaai.com/v1/web-search
+      BOCHA_API_KEY: ${BOCHA_API_KEY}
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      # 邮件
+      EMAIL_HOST: ${EMAIL_HOST}
+      EMAIL_PORT: ${EMAIL_PORT:-465}
+      EMAIL_USE_SSL: "true"
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      EMAIL_FROM: ${EMAIL_FROM}
+    networks:
+      - internal
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/ai/v1/"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
