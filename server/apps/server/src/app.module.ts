@@ -11,8 +11,23 @@ import { PayModule } from './pay/pay.module';
 import { SocketModule } from './socket/socket.module';
 import { LearnModule } from './learn/learn.module';
 import { TrackerModule } from './tracker/tracker.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ReportModule } from './report/report.module';
+
 @Module({
-  imports: [UserModule,SharedModule, WordBookModule, AuthModule, CourseModule, PayModule, SocketModule, LearnModule, TrackerModule],
+  imports: [
+    ScheduleModule.forRoot(),
+    UserModule,
+    SharedModule,
+    WordBookModule,
+    AuthModule,
+    CourseModule,
+    PayModule,
+    SocketModule,
+    LearnModule,
+    TrackerModule,
+    ReportModule,
+  ],
   controllers: [AppController],
   providers: [AppService, AuthService],
 })
