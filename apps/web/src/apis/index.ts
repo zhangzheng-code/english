@@ -90,8 +90,115 @@ export const aiApi = axios.create({
     timeout,
 })
 
-aiApi.interceptors.response.use(res => {
-    return res.data
+aiApi.interceptors.request.use(config => {
+    const userStore = useUserStore()
+    if (userStore.getAccessToken) {
+        config.headers.Authorization = `Bearer ${userStore.getAccessToken}`
+    }
+    // /chat 为 SSE 流式接口，严禁 Axios 超时截断——设为 0 表示永不超时
+    if (config.url && config.url.includes('/chat')) {
+        config.timeout = 0
+    }
+    return config
+})
+
+aiApi.interceptors.response.use(async response => {
+    const res = response.data
+    // 1. 兼容 FastAPI 的 200 OK + code=401 业务层鉴权失效响应
+    if (res && res.code === 401) {
+        const originalRequest = response.config
+        if (originalRequest && originalRequest.url && originalRequest.url.includes('/chat')) {
+            return response
+        }
+        const userStore = useUserStore()
+        const refreshToken = userStore.getRefreshToken
+        if (refreshToken) {
+            try {
+                if (isRefreshing) {
+                    return new Promise((resolve) => {
+                        requestQueue.push((newAccessToken: string) => {
+                            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
+                            resolve(aiApi(originalRequest))
+                        })
+                    })
+                }
+                
+                isRefreshing = true
+                const newToken = await refreshTokenApi({ refreshToken })
+                if (newToken.success) {
+                    userStore.updateToken(newToken.data)
+                    isRefreshing = false
+                    const newAccessToken = newToken.data.accessToken
+                    requestQueue.forEach(callback => callback(newAccessToken))
+                    requestQueue.length = 0
+                    
+                    originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
+                    return await aiApi(originalRequest)
+                } else {
+                    isRefreshing = false
+                    userStore.logout()
+                    router.replace('/')
+                    ElMessage.error('登录已过期,请重新登录')
+                    return res
+                }
+            } catch (e) {
+                isRefreshing = false
+                userStore.logout()
+                router.replace('/')
+                ElMessage.error('登录已过期,请重新登录')
+                return Promise.reject(e)
+            }
+        }
+    }
+    return res
+}, async error => {
+    // 2. 兼容传统的 HTTP 401 网络层响应
+    if (error.response && error.response.status === 401) {
+        const originalRequest = error.config
+        if (originalRequest && originalRequest.url && originalRequest.url.includes('/chat')) {
+            return Promise.reject(error)
+        }
+        const userStore = useUserStore()
+        const refreshToken = userStore.getRefreshToken
+        if (refreshToken) {
+            try {
+                if (isRefreshing) {
+                    return new Promise((resolve) => {
+                        requestQueue.push((newAccessToken: string) => {
+                            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
+                            resolve(aiApi(originalRequest))
+                        })
+                    })
+                }
+
+                isRefreshing = true
+                const newToken = await refreshTokenApi({ refreshToken })
+                if (newToken.success) {
+                    userStore.updateToken(newToken.data)
+                    isRefreshing = false
+                    const newAccessToken = newToken.data.accessToken
+                    requestQueue.forEach(callback => callback(newAccessToken))
+                    requestQueue.length = 0
+
+                    originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
+                    return await aiApi(originalRequest)
+                } else {
+                    isRefreshing = false
+                    userStore.logout()
+                    router.replace('/')
+                    ElMessage.error('登录已过期,请重新登录')
+                    return Promise.reject(error)
+                }
+            } catch (e) {
+                isRefreshing = false
+                userStore.logout()
+                router.replace('/')
+                ElMessage.error('登录已过期,请重新登录')
+                return Promise.reject(e)
+            }
+        }
+    }
+    return Promise.reject(error)
 })
 
 

@@ -15,10 +15,10 @@ if __name__ == "__main__":
     if sys.platform == "win32":
         # 用 asyncio.run 的 loop_factory 参数确保整个生命周期使用 SelectorEventLoop
         async def _main():
-            config = uvicorn.Config("app.main:app", host="0.0.0.0", port=3002, log_level="info")
+            config = uvicorn.Config("app.main:socket_app", host="0.0.0.0", port=3001, log_level="info")
             server = uvicorn.Server(config)
             await server.serve()
 
         asyncio.run(_main(), loop_factory=_loop_factory)
     else:
-        uvicorn.run("app.main:app", host="0.0.0.0", port=3002, log_level="info")
+        uvicorn.run("app.main:socket_app", host="0.0.0.0", port=3001, log_level="info")

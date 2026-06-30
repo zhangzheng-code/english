@@ -167,3 +167,94 @@ async def handle_daily_digest():
             logger.error(f"用户 {user['id']} 处理失败: {e}")
 
     logger.info(f"摘要任务完成，成功发送 {sent_count}/{len(users)} 封邮件")
+
+
+async def build_and_send_daily_digest(db: AsyncSession) -> int:
+    """
+    RAG 错词日报核心处理程序：
+    1. 过滤获取符合日报发送条件的用户列表
+    2. 对每个用户，查询 ChromaDB 获取今日错词/学词在专属电子书架中的原文上下文
+    3. 调用大模型生成排版优雅的 HTML 格式日报内容
+    4. 调用 aiosmtplib 异步将邮件投递至用户邮箱
+    """
+    from langchain_chroma import Chroma
+    from app.llm.embeddings import get_embeddings
+    from app.llm.models import create_deepseek
+
+    users = await get_qualifying_users(db)
+    if not users:
+        logger.info("Chroma Daily Digest: No qualifying users found.")
+        return 0
+
+    sent_count = 0
+    for user in users:
+        try:
+            # 2. 查询 Chroma 检索今日词汇上下文
+            review_context = ""
+            try:
+                embeddings = get_embeddings()
+                vector_store = Chroma(
+                    collection_name="user_corpus",
+                    embedding_function=embeddings,
+                    persist_directory=settings.chroma_db_dir
+                )
+                
+                for w in user["today_words"]:
+                    # 仅针对未掌握 (is_master=False) 的生词，或者所有词进行检索
+                    results = vector_store.similarity_search(
+                        query=w["word"],
+                        k=1,
+                        filter={"user_id": user["id"]}
+                    )
+                    if results:
+                        filename = results[0].metadata.get("filename", "专属电子书")
+                        page = results[0].metadata.get("page", 0)
+                        review_context += (
+                            f"- 生词 **{w['word']}** (释义: {w['translation']}) "
+                            f"出现在您的精读原著《{filename}》第 {page} 页中，原句是：\n"
+                            f"  > \"{results[0].page_content}\"\n\n"
+                        )
+            except Exception as e:
+                logger.warning(f"Chroma lookup failed for user {user['id']}: {e}")
+
+            # 3. 大模型渲染 HTML 日报
+            prompt = (
+                f"Hi {user['name']}，这是您的每日单词与专属原著阅读复习日报。\n\n"
+                f"📊 【今日学习进度概览】\n"
+                f"- 今日学习单词数：{user['today_count']}\n"
+                f"- 已经掌握单词数：{user['mastered_count']}\n"
+                f"- 累计词汇量：{user['word_number']}\n\n"
+                f"📖 【专属电子书架关联复习上下文】\n"
+                f"{review_context or '今日没有触发原著阅读关联背景。'}\n"
+                "请将以上内容进行整合，使用排版精致、带有学习建议与鼓励的 HTML 格式渲染一份优雅的每日复习日报。"
+            )
+
+            llm = create_deepseek()
+            msg = await llm.ainvoke(prompt)
+            html_report = getattr(msg, "content", "")
+
+            # 4. 异步发送邮件
+            success = await send_email(
+                to=user["email"],
+                subject=f"📚 {user['name']}的每日专属复习日报",
+                html=html_report
+            )
+            if success:
+                sent_count += 1
+                logger.info(f"Daily Digest: Sent email to {user['email']}")
+        except Exception as e:
+            logger.error(f"Daily Digest: Failed to process user {user['id']}: {e}")
+
+    return sent_count
+
+
+async def handle_daily_digest():
+    """定时任务总入口，开启数据库 session 并分发执行"""
+    logger.info("每日摘要任务开始执行")
+    try:
+        async with async_session() as session:
+            sent = await build_and_send_daily_digest(session)
+            logger.info(f"每日摘要任务完成，发送成功数: {sent}")
+    except Exception as e:
+        logger.error(f"每日摘要任务在 session 分发中失败: {e}")
+

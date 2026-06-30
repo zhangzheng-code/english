@@ -18,9 +18,7 @@ export class CourseService {
     const courseRecords = await this.prisma.courseRecord.findMany({
       where: {
         userId: userId,
-        paymentRecord: {
-          tradeStatus: TradeStatus.TRADE_SUCCESS
-        }
+        isPurchased: true
       },
       include: {
         course: true

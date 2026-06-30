@@ -7,7 +7,7 @@
             </div>
 
             <div class="flex gap-2">
-                <el-button @click="init">重置</el-button>
+                <el-button @click="onReset">重置</el-button>
                 <el-button @click="onSave" type="primary">保存</el-button>
             </div>
         </div>
@@ -193,11 +193,24 @@ const logoutHandle = () => {
 }
 
 const init = () => {
-    //如果用户登录了，则获取用户信息
-    if(userStore.getUser) {
-        form.value = {...userStore.getUpdateUserInfo}
-        previewUrl.value = customAvatar(form.value.avatar!)
+    if (userStore.user) {
+        form.value = {
+            name: userStore.user.name || '',
+            email: userStore.user.email || '',
+            address: userStore.user.address || '',
+            avatar: userStore.user.avatar || '',
+            bio: userStore.user.bio || '',
+            isTimingTask: !!userStore.user.isTimingTask,
+            timingTaskTime: userStore.user.timingTaskTime || '00:00:00',
+        };
+        previewUrl.value = customAvatar(form.value.avatar || '');
+        formRef.value?.clearValidate();
     }
+}
+
+const onReset = () => {
+    init();
+    ElMessage.success('已重置为当前保存的信息');
 }
 
 onMounted(() => {

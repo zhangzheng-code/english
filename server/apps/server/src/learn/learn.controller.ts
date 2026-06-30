@@ -15,6 +15,27 @@ export class LearnController {
   }
 
   @UseGuards(AuthGuard)
+  @Post('word/mistake')
+  recordMistake(@Body('wordId') wordId: string, @Req() req: Request) {
+    const userId = req.user.userId;
+    return this.learnService.recordMistake(wordId, userId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('word/mistakes')
+  getMistakes(@Req() req: Request) {
+    const userId = req.user.userId;
+    return this.learnService.getMistakeList(userId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('word/mistake-resolve')
+  resolveMistake(@Body('wordId') wordId: string, @Req() req: Request) {
+    const userId = req.user.userId;
+    return this.learnService.resolveMistake(wordId, userId);
+  }
+
+  @UseGuards(AuthGuard)
   @Get('word/:id')
   getWordList(@Param('id') id: string,@Req() req: Request) {
     const userId = req.user.userId;
@@ -22,3 +43,4 @@ export class LearnController {
   }
 
 }
+

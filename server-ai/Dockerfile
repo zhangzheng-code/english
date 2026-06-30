@@ -33,4 +33,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:3001/ai/v1/ || exit 1
 
 # Linux 环境直接用 uvicorn，PostgresSaver 将自动激活
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "3001", "--workers", "1"]
+CMD ["uvicorn", "app.main:socket_app", "--host", "0.0.0.0", "--port", "3001", "--workers", "1"]

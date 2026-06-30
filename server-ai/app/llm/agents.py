@@ -1,21 +1,20 @@
-from __future__ import annotations
-
-from langchain_deepseek import ChatDeepSeek
-from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
-from langgraph.prebuilt import create_react_agent
+from typing import Any
+from langchain.agents import create_agent
+from app.llm.middleware import dynamic_model_selector
 
 
 def build_agent(
-    model: ChatDeepSeek,
+    model: Any,
     system_prompt: str,
-    checkpointer: AsyncPostgresSaver | None = None,
+    checkpointer: Any = None,
     tools: list | None = None,
 ):
     kwargs = {
         "model": model,
         "tools": tools or [],
-        "prompt": system_prompt,
+        "system_prompt": system_prompt,
+        "middleware": [dynamic_model_selector],
     }
     if checkpointer is not None:
         kwargs["checkpointer"] = checkpointer
-    return create_react_agent(**kwargs)
+    return create_agent(**kwargs)

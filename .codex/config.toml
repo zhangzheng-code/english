@@ -1,0 +1,7 @@
+[mcp_servers.codegraph]
+command = "npx"
+args = [
+    "@stupidloud/codegraph",
+    "serve",
+    "--mcp",
+]

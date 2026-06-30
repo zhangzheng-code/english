@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "agy-frontend-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "agy-frontend-mcp"
+      ],
+      "env": {
+        "DRIB_STYLE_PREFER": "minimal-luxury",
+        "UI_FRAMEWORK": "ShadCN",
+        "GIT_SANDBOX_ISOLATE": "true"
+      }
+    }
+  }
+}

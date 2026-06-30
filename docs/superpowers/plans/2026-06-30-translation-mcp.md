@@ -157,7 +157,7 @@ git commit -m "feat: build custom translation and dual-parsing MCP server"
 - 修改：`server-ai/app/llm/tools.py:105-135`
 - 修改：`server-ai/app/services/chat.py:85-100`
 
-- [x] **步骤 1：在 `tools.py` 中编写 MCP 客户端连接与获取函数**
+- [ ] **步骤 1：在 `tools.py` 中编写 MCP 客户端连接与获取函数**
 
 修改 `server-ai/app/llm/tools.py`，在文件末尾追加以下代码：
 
@@ -183,7 +183,7 @@ async def get_translation_mcp_tools():
     return await client.get_tools()
 ```
 
-- [x] **步骤 2：在 `chat.py` 中挂载工具并优化系统提示词**
+- [ ] **步骤 2：在 `chat.py` 中挂载工具并优化系统提示词**
 
 修改 `server-ai/app/services/chat.py` 中的 `stream_chat` 函数（约第 88-98 行）：
 
@@ -230,12 +230,12 @@ async def get_translation_mcp_tools():
     )
 ```
 
-- [x] **步骤 3：运行语法与模块检查**
+- [ ] **步骤 3：运行语法与模块检查**
 
 运行：`cd server-ai && .\.venv\Scripts\python.exe -c "from app.services.chat import stream_chat; print('Import OK')"`
 预期：输出 `Import OK`，无语法报错。
 
-- [x] **步骤 4：Commit 提交代码**
+- [ ] **步骤 4：Commit 提交代码**
 
 ```bash
 git add server-ai/app/llm/tools.py server-ai/app/services/chat.py

@@ -7,6 +7,7 @@ export type ChatMessage = {
     content:string; //Chat聊天所返回的内容
     reasoning?:string; //深度思考所返回的内容
     type:ChatMessageType // reasoning: 深度思考的一个状态 chat: 聊天的状态
+    imageUrl?:string; //多模态上传的图片URL或base64
 }
 //消息列表
 export type ChatMessageList = ChatMessage[]
@@ -28,6 +29,8 @@ export type ChatDto = {
     role:ChatRoleType; //角色
     content:string; //内容
     userId:string; //用户id
+    imageUrl?:string; //多模态图片
+    fileId?:string; //选中原著书籍上下文学习
 }
 
 //会话隔离 线程id userId-role  userId:123 role:normal 线程id:123-normal
