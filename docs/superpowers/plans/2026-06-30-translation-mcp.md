@@ -17,7 +17,7 @@
 - 创建：`server-ai/translate_mcp_server.py`
 - 创建：`server-ai/tests/test_translate_mcp.py`
 
-- [ ] **步骤 1：编写失败的单元测试**
+- [x] **步骤 1：编写失败的单元测试**
 
 创建 `server-ai/tests/test_translate_mcp.py`，测试核心解析函数的逻辑与结构化返回值：
 
@@ -38,17 +38,17 @@ async def test_parse_english_text():
     assert isinstance(data["example_sentences"], list)
 ```
 
-- [ ] **步骤 2：运行测试验证失败**
+- [x] **步骤 2：运行测试验证失败**
 
 运行：`cd server-ai && .\.venv\Scripts\python.exe -m pytest tests/test_translate_mcp.py -v`
 预期：FAIL，报错 `ModuleNotFoundError: No module named 'translate_mcp_server'`
 
-- [ ] **步骤 3：安装 fastmcp 与 langchain-mcp-adapters 依赖**
+- [x] **步骤 3：安装 fastmcp 与 langchain-mcp-adapters 依赖**
 
 运行：`cd server-ai && .\.venv\Scripts\pip.exe install fastmcp langchain-mcp-adapters`
 预期：成功安装 fastmcp 与 langchain-mcp-adapters 及其相关依赖。
 
-- [ ] **步骤 4：编写 MCP Server 完整实现**
+- [x] **步骤 4：编写 MCP Server 完整实现**
 
 创建 `server-ai/translate_mcp_server.py`：
 
@@ -137,12 +137,12 @@ if __name__ == "__main__":
     mcp.run(transport="stdio")
 ```
 
-- [ ] **步骤 5：运行测试验证通过**
+- [x] **步骤 5：运行测试验证通过**
 
 运行：`cd server-ai && .\.venv\Scripts\python.exe -m pytest tests/test_translate_mcp.py -v`
 预期：PASS
 
-- [ ] **步骤 6：Commit 提交代码**
+- [x] **步骤 6：Commit 提交代码**
 
 ```bash
 git add server-ai/translate_mcp_server.py server-ai/tests/test_translate_mcp.py
