@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 from typing import AsyncIterator
+import logging
+
+logger = logging.getLogger(__name__)
 
 import httpx
 from langchain_core.messages import HumanMessage
@@ -91,9 +94,8 @@ async def stream_chat(body: dict) -> AsyncIterator[dict]:
     
     try:
         mcp_tools = await get_translation_mcp_tools()
-    except Exception as e:
-        import sys
-        print(f"[WARN] 加载翻译 MCP 工具失败，将仅使用基础检索: {e}", file=sys.stderr)
+    except Exception:
+        logger.warning("加载翻译 MCP 工具失败，将仅使用基础检索", exc_info=True)
         mcp_tools = []
 
     # 提示词增强：指引 AI 人格优先使用 MCP 工具

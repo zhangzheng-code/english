@@ -132,15 +132,28 @@ def create_oral_practice_tool(user_id: str):
     return start_oral_practice
 
 
+_mcp_tools_cache = None
+
+
 async def get_translation_mcp_tools():
     """
     连接本地 translate_mcp_server.py MCP 服务，获取解析工具。
     """
-    import os
+    global _mcp_tools_cache
+    import asyncio
+    try:
+        current_loop = asyncio.get_running_loop()
+    except RuntimeError:
+        current_loop = None
+
+    if _mcp_tools_cache is not None and _mcp_tools_cache[0] is current_loop and current_loop is not None and not current_loop.is_closed():
+        return _mcp_tools_cache[1]
+
     import sys
+    from pathlib import Path
     from langchain_mcp_adapters.client import MultiServerMCPClient
     
-    server_script = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "translate_mcp_server.py")
+    server_script = str(Path(__file__).resolve().parents[2] / "translate_mcp_server.py")
     
     client = MultiServerMCPClient({
         "english_parser": {
@@ -149,4 +162,6 @@ async def get_translation_mcp_tools():
             "args": [server_script]
         }
     })
-    return await client.get_tools()
+    tools = await client.get_tools()
+    _mcp_tools_cache = (current_loop, tools)
+    return tools
