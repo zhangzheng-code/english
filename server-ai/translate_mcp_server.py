@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import httpx
 from fastmcp import FastMCP
@@ -9,6 +10,29 @@ load_dotenv()
 mcp = FastMCP("EnglishParser")
 
 async def parse_english_text(text: str, parse_type: str = "auto") -> str:
+    if not text or not text.strip():
+        return json.dumps({
+            "original": text,
+            "translation": "输入文本不能为空",
+            "phonetic": "",
+            "root_affix": "",
+            "grammar_breakdown": "",
+            "example_sentences": []
+        }, ensure_ascii=False)
+
+    if len(text) > 3000:
+        return json.dumps({
+            "original": text[:50] + "...",
+            "translation": "输入文本过长（超过 3000 字符），无法进行解析",
+            "phonetic": "",
+            "root_affix": "",
+            "grammar_breakdown": "",
+            "example_sentences": []
+        }, ensure_ascii=False)
+
+    if parse_type not in ("word", "sentence", "auto"):
+        parse_type = "auto"
+
     api_key = os.getenv("DEEPSEEK_API_KEY", "")
     if not api_key:
         return json.dumps({
@@ -20,13 +44,13 @@ async def parse_english_text(text: str, parse_type: str = "auto") -> str:
             "example_sentences": []
         }, ensure_ascii=False)
 
-    prompt = f"""请对以下英文或中文内容进行深度复合解析与互译。
-内容："{text}"
-解析模式：{parse_type} (word=单词解析, sentence=长句语法拆解, auto=智能识别)
+    system_prompt = f"""你是一个专业的英文/中文深度复合解析与互译专家。
+请严格按照要求进行深度解析，并必须返回且仅返回一个合法的 JSON 字符串。
+当前解析模式：{parse_type} (word=单词解析, sentence=长句语法拆解, auto=智能识别)
 
-你必须返回且仅返回一个合法的 JSON 字符串，格式严谨如下：
+返回 JSON 格式严谨如下：
 {{
-  "original": "{text}",
+  "original": "原始文本",
   "translation": "准确地道的中文或英文翻译",
   "phonetic": "美英双音标（仅单词提供，长句填空字符串）",
   "root_affix": "词根词缀拆解与记忆法（单词必填，长句说明核心短语）",
@@ -38,6 +62,8 @@ async def parse_english_text(text: str, parse_type: str = "auto") -> str:
   ]
 }}"""
 
+    user_prompt = f"请对以下内容进行深度解析与互译：\n{text}"
+
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             resp = await client.post(
@@ -48,7 +74,10 @@ async def parse_english_text(text: str, parse_type: str = "auto") -> str:
                 },
                 json={
                     "model": "deepseek-chat",
-                    "messages": [{"role": "user", "content": prompt}],
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt}
+                    ],
                     "response_format": {"type": "json_object"},
                     "temperature": 0.3
                 }
@@ -59,6 +88,7 @@ async def parse_english_text(text: str, parse_type: str = "auto") -> str:
             else:
                 raise Exception(f"HTTP {resp.status_code}: {resp.text}")
     except Exception as e:
+        print(f"[ERROR] 解析服务请求异常: {str(e)}", file=sys.stderr)
         return json.dumps({
             "original": text,
             "translation": f"基础翻译查询。解析服务暂不可用 ({str(e)})",
