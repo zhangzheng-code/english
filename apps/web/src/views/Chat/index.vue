@@ -1,22 +1,29 @@
 <template>
-    <div class="w-[1320px] mx-auto flex mt-10 gap-4 items-start relative">
-        <Conversations @onGetRole="getRole" />
-        <div class="flex-1 flex flex-col gap-4">
-            <div class="flex justify-between items-center px-4 bg-gradient-to-r from-purple-900/15 via-indigo-900/10 to-purple-500/10 py-3 rounded-2xl border border-purple-300/60 shadow-md backdrop-blur-sm">
-                <div class="flex items-center gap-2.5">
-                    <span class="animate-pulse flex h-3 w-3 relative">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-600"></span>
-                    </span>
-                    <span class="text-xs font-extrabold text-purple-950 tracking-wide">多模态情境化口语引擎准备就绪 (PCM / 阿里云 SenseVoice / 音素诊断)</span>
-                </div>
-                <el-button type="primary" size="default" class="!bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 border-none shadow-lg hover:shadow-purple-500/50 hover:scale-102 active:scale-98 transition-all text-white font-bold px-4 py-2 rounded-xl" @click="openOralModal()">
-                    🎙️ 启动 AI 多模态口语情境陪练
-                </el-button>
-            </div>
-            <Bubble ref="bubbleRef" :list="list" @onSendMessage="sendMessage" />
+    <div class="w-full max-w-[1440px] mx-auto px-6 mt-6 pb-8 flex gap-6 items-stretch h-[820px] relative">
+        <!-- 左侧可折叠会话人格栏 -->
+        <Conversations 
+            :isCollapsed="isLeftCollapsed" 
+            @toggleCollapse="isLeftCollapsed = !isLeftCollapsed" 
+            @onGetRole="getRole" 
+        />
+
+        <!-- 中间气泡交互工作台 -->
+        <div class="flex-1 flex flex-col min-w-0 transition-all duration-500 ease-out">
+            <Bubble 
+                ref="bubbleRef" 
+                :list="list" 
+                @onSendMessage="sendMessage" 
+                @openOralModal="openOralModal"
+            />
         </div>
-        <Bookshelf @selectBook="onSelectBook" />
+
+        <!-- 右侧可折叠 RAG 书架 -->
+        <Bookshelf 
+            :isCollapsed="isRightCollapsed" 
+            @toggleCollapse="isRightCollapsed = !isRightCollapsed" 
+            @selectBook="onSelectBook" 
+        />
+
         <OralPracticeModal ref="oralModalRef" />
     </div>
 </template>
@@ -31,6 +38,9 @@ import { getChatHistory } from '@/apis/chat';
 import type { ChatRoleType, ChatMessageList, ChatDto, ChatMessage } from '@en/common/chat';
 import { sse, CHAT_URL } from '@/apis/sse';
 import { ElMessage } from 'element-plus';
+
+const isLeftCollapsed = ref(false)
+const isRightCollapsed = ref(false)
 
 const userStore = useUserStore()
 const list = ref<ChatMessageList>([]) //存储历史记录的数组

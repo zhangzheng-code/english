@@ -1,34 +1,56 @@
 <template>
-    <header class="flex items-center h-20 border-b border-gray-200 justify-center sticky top-0 bg-white z-10">
-        <div class="w-[1200px] mx-auto flex items-center justify-between">
-            <div
-                class="text-2xl font-bold bg-indigo-700 text-white rounded-[10px] px-2 py-1 w-10 flex items-center justify-center h-10 ">
-                E</div>
-            <div class="text-2xl font-bold">English App</div>
-            <template v-for="route in routes" :key="route.path">
-                <div @click="gotoPath(route.path)" :class="isActive(route.path)"
-                    class="flex items-center gap-2 cursor-pointer rounded-[10px] px-2 py-1">
-                    <el-icon>
-                        <component :is="route.icon" />
-                    </el-icon>
-                    <span>{{ route.name }}</span>
+    <header class="flex items-center h-20 justify-center sticky top-0 z-50 backdrop-blur-2xl bg-white/75 border-b border-purple-100/60 shadow-xs transition-all duration-300">
+        <div class="w-full max-w-[1400px] px-6 mx-auto flex items-center justify-between">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3 cursor-pointer group" @click="gotoPath('/')">
+                <div class="text-xl font-black bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 text-white rounded-2xl w-10 h-10 flex items-center justify-center shadow-lg shadow-indigo-500/25 group-hover:scale-105 transition-all duration-300">
+                    E
                 </div>
-            </template>
-            <div class="flex items-center gap-2 bg-blue-200 text-blue-700 rounded-full px-2 py-1"><el-icon>
-                    <Sunny />
-                </el-icon> <span class="font-bold text-sm">{{ userStore.getUser?.wordNumber ?? 0 }}</span></div>
-            <div class="flex items-center gap-2 bg-amber-200 text-amber-700 rounded-full px-2 py-1"><el-icon>
-                    <Star />
-                </el-icon> <span class="font-bold text-sm">{{ userStore.getUser?.dayNumber ?? 0 }}</span></div>
-            <el-popover :width="340">
-                <template #reference>
-                    <div class="flex items-center gap-2 border-l cursor-pointer border-gray-200 pl-4">
-                        <img class="w-10 h-10 rounded-full ml-2 mr-2" :src="avatar" />
-                        <span class="text-sm font-bold">{{ userStore.getUser?.name ?? '游客' }}</span>
+                <div class="flex flex-col">
+                    <span class="text-lg font-black bg-gradient-to-r from-neutral-800 via-purple-950 to-indigo-900 bg-clip-text text-transparent tracking-tight">Antigravity English</span>
+                    <span class="text-[10px] font-semibold text-purple-500/80 tracking-widest uppercase -mt-1">Multimodal AI Workspace</span>
+                </div>
+            </div>
+
+            <!-- Pill Navigation Tabs -->
+            <nav class="flex items-center gap-1.5 bg-purple-50/70 p-1.5 rounded-full border border-purple-100/80 shadow-inner backdrop-blur-md">
+                <template v-for="route in routes" :key="route.path">
+                    <div @click="gotoPath(route.path)"
+                        :class="currentPath === route.path 
+                            ? 'bg-white text-purple-900 shadow-sm font-bold scale-102 border border-purple-100/60' 
+                            : 'text-neutral-600 hover:text-purple-900 hover:bg-white/50 font-medium'"
+                        class="flex items-center gap-2 cursor-pointer rounded-full px-4 py-2 text-xs transition-all duration-300 select-none">
+                        <el-icon :size="15" class="transition-transform duration-300 group-hover:scale-110">
+                            <component :is="route.icon" />
+                        </el-icon>
+                        <span>{{ route.name }}</span>
                     </div>
                 </template>
-                <Profile />
-            </el-popover>
+            </nav>
+
+            <!-- User Stats & Profile Widget -->
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1.5 bg-gradient-to-r from-blue-50 to-indigo-50/80 text-indigo-700 border border-blue-200/60 rounded-full px-3 py-1.5 shadow-2xs hover:shadow-sm transition-all" title="掌握词汇量">
+                    <el-icon class="text-amber-500"><Sunny /></el-icon>
+                    <span class="font-extrabold text-xs">{{ userStore.getUser?.wordNumber ?? 0 }}</span>
+                    <span class="text-[10px] text-indigo-400 font-medium">词</span>
+                </div>
+                <div class="flex items-center gap-1.5 bg-gradient-to-r from-amber-50 to-orange-50/80 text-amber-700 border border-amber-200/60 rounded-full px-3 py-1.5 shadow-2xs hover:shadow-sm transition-all" title="连续坚持天数">
+                    <el-icon class="text-orange-500"><Star /></el-icon>
+                    <span class="font-extrabold text-xs">{{ userStore.getUser?.dayNumber ?? 0 }}</span>
+                    <span class="text-[10px] text-amber-500 font-medium">天</span>
+                </div>
+
+                <el-popover :width="340" placement="bottom-end" trigger="click">
+                    <template #reference>
+                        <div class="flex items-center gap-2.5 bg-neutral-100/80 hover:bg-purple-50/80 border border-neutral-200/80 hover:border-purple-300/60 rounded-full p-1.5 pr-4 cursor-pointer transition-all duration-300 shadow-2xs">
+                            <img class="w-8 h-8 rounded-full object-cover border border-white shadow-xs" :src="avatar" />
+                            <span class="text-xs font-bold text-neutral-800 truncate max-w-[90px]">{{ userStore.getUser?.name ?? '游客' }}</span>
+                        </div>
+                    </template>
+                    <Profile />
+                </el-popover>
+            </div>
         </div>
     </header>
 </template>

@@ -1,15 +1,31 @@
 <template>
-  <div class="w-[320px] h-[750px] p-5 bg-white border border-zinc-100 rounded-2xl flex flex-col shadow-sm">
+  <div :class="isCollapsed ? 'w-[68px]' : 'w-[300px]'" class="bg-white/80 backdrop-blur-2xl rounded-3xl p-3.5 border border-purple-100/80 shadow-md transition-all duration-500 ease-out flex flex-col h-full shrink-0">
     <!-- Header -->
-    <div class="flex items-center justify-between pb-4 border-b border-zinc-100">
-      <div class="flex items-center gap-2">
-        <span class="text-xl">📚</span>
-        <h2 class="text-md font-bold text-zinc-800">专属精读电子书架</h2>
+    <div class="flex items-center justify-between pb-3 border-b border-purple-100/60" :class="{ 'justify-center': isCollapsed }">
+      <div v-if="!isCollapsed" class="flex items-center gap-2 overflow-hidden">
+        <span class="text-base">📚</span>
+        <h2 class="text-xs font-black bg-gradient-to-r from-purple-900 to-indigo-800 bg-clip-text text-transparent tracking-wide">专属 RAG 精读书架</h2>
       </div>
-      <el-tooltip content="仅支持 .txt 或 .pdf 格式原著电子书" placement="top">
-        <span class="text-xs text-zinc-400 cursor-help">ℹ️</span>
-      </el-tooltip>
+      <div class="flex items-center gap-1.5">
+        <el-tooltip v-if="!isCollapsed" content="仅支持 .txt 或 .pdf 格式原著电子书" placement="top">
+          <span class="text-xs text-purple-400 cursor-help">ℹ️</span>
+        </el-tooltip>
+        <div @click="emits('toggleCollapse')" class="w-7 h-7 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-700 flex items-center justify-center cursor-pointer transition-transform duration-300 hover:scale-110 shadow-2xs select-none" :title="isCollapsed ? '展开书架' : '收起书架'">
+          <span class="text-[10px] font-bold">{{ isCollapsed ? '◀' : '▶' }}</span>
+        </div>
+      </div>
     </div>
+
+    <!-- Collapsed State Vertical Icon -->
+    <div v-if="isCollapsed" class="flex-1 flex flex-col items-center justify-center gap-3 py-4 cursor-pointer" @click="emits('toggleCollapse')" title="点击展开精读书架">
+      <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-500 to-indigo-500 text-white flex items-center justify-center text-lg shadow-md shadow-purple-500/30 animate-pulse">
+        📚
+      </div>
+      <span class="text-[10px] font-black text-purple-700 writing-vertical tracking-widest uppercase">RAG Bookshelf</span>
+    </div>
+
+    <!-- Upload Section & List (Only when expanded) -->
+    <template v-else>
 
     <!-- Upload Section -->
     <div class="mt-4">
@@ -135,6 +151,7 @@
         </div>
       </div>
     </div>
+    </template>
   </div>
 </template>
 
@@ -145,6 +162,9 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import SparkMD5 from 'spark-md5'
 import { aiApi } from '@/apis'
 
+defineProps<{ isCollapsed?: boolean }>()
+const emits = defineEmits(['selectBook', 'toggleCollapse'])
+
 interface BookFile {
   id: string
   filename: string
@@ -154,8 +174,6 @@ interface BookFile {
   status: string
   createdAt: string
 }
-
-const emits = defineEmits(['selectBook'])
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const loading = ref(false)
