@@ -33,3 +33,13 @@ Thumbs.db
 
 # 系统
 desktop.ini
+
+# Python / AI Server
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+chroma_db/
+test_chroma_db/
