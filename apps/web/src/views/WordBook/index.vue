@@ -1,13 +1,13 @@
 <template>
-    <div class="w-[1200px] mx-auto mt-10 bg-linear-to-br from-blue-50 to-indigo-50 rounded-[20px] p-20 shadow-lg">
+    <div class="w-[1200px] mx-auto mt-10 rounded-[20px] p-20 shadow-lg" style="background: var(--color-surface);">
         <div class="h-20">
             <div class="flex items-center gap-2">
-                <el-icon color="#2563EB" size="20">
+                <el-icon size="20" :style="{ color: 'var(--color-accent)' }">
                     <Reading />
                 </el-icon>
-                <span class="text-2xl font-bold text-gray-800">词库列表</span>
+                <span class="text-2xl font-bold" style="color: var(--color-text-primary);">词库列表</span>
             </div>
-            <div class="text-sm text-gray-600">词典来源：牛津、柯林斯、BNC、FRQ、高考、中考、GRE、TOEFL、IELTS、大学英语六级、大学英语四级、考研</div>
+            <div class="text-sm" style="color: var(--color-text-secondary);">词典来源：牛津、柯林斯、BNC、FRQ、高考、中考、GRE、TOEFL、IELTS、大学英语六级、大学英语四级、考研</div>
         </div>
         <div class="flex items-center mb-10">
             <el-input @keyup.enter="searchWord" class="mr-10" v-model="query.word" placeholder="请输入单词"></el-input>
@@ -22,26 +22,35 @@
             <el-button @click="searchWord" class="ml-10" type="primary">搜索</el-button>
         </div>
         <div class="grid grid-cols-3 gap-2">
-            <div class="bg-white hover:bg-blue-50 border border-blue-200 text-gray-800 rounded-[10px] p-4 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md h-[220px]"
+            <div class="rounded-[10px] p-4 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md h-[220px]"
+                :style="{
+                    background: 'var(--color-surface)',
+                    border: '1px solid var(--color-surface-border)',
+                    color: 'var(--color-text-primary)'
+                }"
+                @mouseenter="(e) => (e.currentTarget as HTMLElement).style.background = 'var(--color-surface-hover)'"
+                @mouseleave="(e) => (e.currentTarget as HTMLElement).style.background = 'var(--color-surface)'"
                 v-for="item in list" :key="item.id">
                 <div class="">
-                    <div class="text-sm font-semibold text-blue-600 mb-1">{{ item.word }}</div>
-                    <div class="text-sm text-gray-500 mb-1 flex items-center gap-2">{{ item.phonetic }} <el-icon
-                            size="18" color="#2563EB" @click="playAudio(item.word)">
+                    <div class="text-sm font-semibold mb-1" style="color: var(--color-accent);">{{ item.word }}</div>
+                    <div class="text-sm mb-1 flex items-center gap-2" style="color: var(--color-text-muted);">
+                        {{ item.phonetic }}
+                        <el-icon size="18" :style="{ color: 'var(--color-accent)' }" @click="playAudio(item.word)">
                             <VideoPlay />
-                        </el-icon></div>
-                    <div class="text-sm text-gray-700 mb-1 overflow-hidden line-clamp-2">{{ item.definition }}</div>
-                    <div v-html="item.translation" class="text-sm text-gray-600 mb-1 overflow-hidden line-clamp-2">
+                        </el-icon>
                     </div>
-                    <div class="text-sm text-gray-600 mt-3 flex items-center gap-2 flex-wrap">
-                        <el-tag v-if="item.gk" type="primary" size="small">高考</el-tag>
-                        <el-tag v-if="item.zk" type="primary" size="small">中考</el-tag>
-                        <el-tag v-if="item.gre" type="primary" size="small">GRE</el-tag>
-                        <el-tag v-if="item.toefl" type="primary" size="small">TOEFL</el-tag>
-                        <el-tag v-if="item.ielts" type="primary" size="small">IELTS</el-tag>
-                        <el-tag v-if="item.cet6" type="primary" size="small">六级</el-tag>
-                        <el-tag v-if="item.cet4" type="primary" size="small">四级</el-tag>
-                        <el-tag v-if="item.ky" type="primary" size="small">考研</el-tag>
+                    <div class="text-sm mb-1 overflow-hidden line-clamp-2" style="color: var(--color-text-primary);">{{ item.definition }}</div>
+                    <div v-html="item.translation" class="text-sm mb-1 overflow-hidden line-clamp-2" style="color: var(--color-text-secondary);">
+                    </div>
+                    <div class="text-sm mt-3 flex items-center gap-2 flex-wrap">
+                        <span v-if="item.gk" class="px-2 py-0.5 rounded-full text-xs" style="background: var(--color-accent-soft); color: var(--color-text-primary);">高考</span>
+                        <span v-if="item.zk" class="px-2 py-0.5 rounded-full text-xs" style="background: var(--color-accent-soft); color: var(--color-text-primary);">中考</span>
+                        <span v-if="item.gre" class="px-2 py-0.5 rounded-full text-xs" style="background: var(--color-accent-soft); color: var(--color-text-primary);">GRE</span>
+                        <span v-if="item.toefl" class="px-2 py-0.5 rounded-full text-xs" style="background: var(--color-accent-soft); color: var(--color-text-primary);">TOEFL</span>
+                        <span v-if="item.ielts" class="px-2 py-0.5 rounded-full text-xs" style="background: var(--color-accent-soft); color: var(--color-text-primary);">IELTS</span>
+                        <span v-if="item.cet6" class="px-2 py-0.5 rounded-full text-xs" style="background: var(--color-accent-soft); color: var(--color-text-primary);">六级</span>
+                        <span v-if="item.cet4" class="px-2 py-0.5 rounded-full text-xs" style="background: var(--color-accent-soft); color: var(--color-text-primary);">四级</span>
+                        <span v-if="item.ky" class="px-2 py-0.5 rounded-full text-xs" style="background: var(--color-accent-soft); color: var(--color-text-primary);">考研</span>
                     </div>
                 </div>
             </div>

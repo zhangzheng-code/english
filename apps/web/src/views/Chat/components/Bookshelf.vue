@@ -1,156 +1,144 @@
 <template>
-  <div :class="isCollapsed ? 'w-[68px]' : 'w-[300px]'" class="bg-white/80 backdrop-blur-2xl rounded-3xl p-3.5 border border-purple-100/80 shadow-md transition-all duration-500 ease-out flex flex-col h-full shrink-0">
+  <div :class="isCollapsed ? 'w-[68px]' : 'w-[300px]'"
+      class="rounded-3xl p-4 transition-all duration-500 ease-out flex flex-col h-full shrink-0"
+      style="background: rgba(255,255,255,0.70); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--color-surface-border); box-shadow: 0 4px 24px rgba(0,0,0,0.04);">
+
     <!-- Header -->
-    <div class="flex items-center justify-between pb-3 border-b border-purple-100/60" :class="{ 'justify-center': isCollapsed }">
+    <div class="flex items-center justify-between pb-4 mb-1"
+        :class="{ 'justify-center': isCollapsed }"
+        :style="{ borderBottom: '1px solid var(--color-surface-border)' }">
       <div v-if="!isCollapsed" class="flex items-center gap-2 overflow-hidden">
         <span class="text-base">📚</span>
-        <h2 class="text-xs font-black bg-gradient-to-r from-purple-900 to-indigo-800 bg-clip-text text-transparent tracking-wide">专属 RAG 精读书架</h2>
+        <h2 class="text-xs font-black tracking-wide" style="color: var(--color-text-primary)">专属 RAG 精读书架</h2>
       </div>
       <div class="flex items-center gap-1.5">
         <el-tooltip v-if="!isCollapsed" content="仅支持 .txt 或 .pdf 格式原著电子书" placement="top">
-          <span class="text-xs text-purple-400 cursor-help">ℹ️</span>
+          <span class="text-xs cursor-help" style="color: var(--color-text-muted)">ℹ️</span>
         </el-tooltip>
-        <div @click="emits('toggleCollapse')" class="w-7 h-7 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-700 flex items-center justify-center cursor-pointer transition-transform duration-300 hover:scale-110 shadow-2xs select-none" :title="isCollapsed ? '展开书架' : '收起书架'">
+        <div @click="emits('toggleCollapse')"
+            class="w-7 h-7 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110 select-none"
+            :style="{ background: 'var(--color-surface-hover)', color: 'var(--color-text-muted)' }"
+            :title="isCollapsed ? '展开书架' : '收起书架'">
           <span class="text-[10px] font-bold">{{ isCollapsed ? '◀' : '▶' }}</span>
         </div>
       </div>
     </div>
 
-    <!-- Collapsed State Vertical Icon -->
-    <div v-if="isCollapsed" class="flex-1 flex flex-col items-center justify-center gap-3 py-4 cursor-pointer" @click="emits('toggleCollapse')" title="点击展开精读书架">
-      <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-500 to-indigo-500 text-white flex items-center justify-center text-lg shadow-md shadow-purple-500/30 animate-pulse">
+    <!-- Collapsed icon -->
+    <div v-if="isCollapsed" class="flex-1 flex flex-col items-center justify-center gap-3 py-4 cursor-pointer"
+        @click="emits('toggleCollapse')" title="点击展开精读书架">
+      <div class="w-10 h-10 rounded-2xl flex items-center justify-center text-lg shadow-md animate-pulse"
+          style="background: linear-gradient(135deg, #B8B0E8, #F4A4B0); color: white">
         📚
       </div>
-      <span class="text-[10px] font-black text-purple-700 writing-vertical tracking-widest uppercase">RAG Bookshelf</span>
+      <span class="text-[10px] font-black tracking-widest uppercase" style="color: var(--color-accent); writing-mode: vertical-lr">RAG Books</span>
     </div>
 
-    <!-- Upload Section & List (Only when expanded) -->
     <template v-else>
-
-    <!-- Upload Section -->
-    <div class="mt-4">
-      <input
-        type="file"
-        ref="fileInputRef"
-        class="hidden"
-        accept=".txt,.pdf"
-        @change="handleFileChange"
-      />
-      <div
-        class="border border-dashed border-zinc-300 rounded-xl p-4 flex flex-col items-center justify-center bg-zinc-50 hover:bg-indigo-50/30 hover:border-indigo-400 transition-all duration-300 cursor-pointer group"
-        @click="triggerFileInput"
-      >
-        <span class="text-2xl group-hover:scale-110 transition-transform duration-300">📤</span>
-        <span class="text-xs font-semibold text-zinc-600 mt-2">点击或拖拽上传精读电子书</span>
-        <span class="text-[10px] text-zinc-400 mt-1">支持 TXT / PDF 格式</span>
-      </div>
-    </div>
-
-    <!-- Upload Progress -->
-    <div v-if="uploadState.isUploading" class="mt-4 p-3 bg-indigo-50/50 rounded-xl border border-indigo-100">
-      <div class="flex items-center justify-between text-xs mb-1">
-        <span class="font-medium text-indigo-700 truncate max-w-[150px]">{{ uploadState.filename }}</span>
-        <span class="text-indigo-600 font-bold">{{ uploadState.progress }}%</span>
-      </div>
-      <el-progress :percentage="uploadState.progress" :show-text="false" status="success" />
-      <div class="text-[10px] text-indigo-500 mt-1">{{ uploadState.statusText }}</div>
-    </div>
-
-    <!-- Book List -->
-    <div class="flex-1 overflow-y-auto mt-4 pr-1 custom-scrollbar">
-      <div v-if="loading" class="flex flex-col items-center justify-center h-48 gap-2">
-        <el-icon class="is-loading text-zinc-400" :size="24"><Loading /></el-icon>
-        <span class="text-xs text-zinc-400">正在载入书架...</span>
-      </div>
-      <div v-else-if="books.length === 0" class="flex flex-col items-center justify-center h-48 gap-2">
-        <span class="text-3xl grayscale opacity-60">📖</span>
-        <span class="text-xs text-zinc-400">您的书架空空如也</span>
-        <span class="text-[10px] text-zinc-300">上传精读材料以开启 RAG 检索对练</span>
-      </div>
-      <div v-else class="flex flex-col gap-3">
-        <div
-          v-for="book in books"
-          :key="book.id"
-          class="group p-3 border rounded-xl transition-all duration-300 flex gap-3 relative overflow-hidden"
-          :class="[
-            book.status === 'processing'
-              ? 'border-amber-100 bg-amber-50/10 cursor-not-allowed hover:bg-amber-50/20'
-              : book.status === 'failed'
-              ? 'border-red-100 bg-red-50/10 cursor-not-allowed hover:bg-red-50/20'
-              : 'border-zinc-100 bg-emerald-50/5 hover:border-emerald-200 hover:shadow-md hover:shadow-indigo-500/5 cursor-pointer'
-          ]"
-          @click="handleBookClick(book)"
-        >
-          <!-- Delete button -->
-          <div
-            class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
-            @click.stop="handleDeleteBook(book)"
-          >
-            <el-tooltip content="从书架彻底移除此资料" placement="top">
-              <span class="w-5 h-5 rounded-full bg-red-50 hover:bg-red-100 flex items-center justify-center text-[10px] text-red-500 shadow-sm cursor-pointer select-none transition-colors">🗑️</span>
-            </el-tooltip>
-          </div>
-
-          <!-- Book Cover Icon Placeholder -->
-          <div
-            class="w-10 h-12 rounded flex items-center justify-center text-white text-md font-bold shadow-sm select-none"
-            :class="[
-              book.status === 'processing'
-                ? 'bg-gradient-to-tr from-amber-400 to-orange-400'
-                : book.status === 'failed'
-                ? 'bg-gradient-to-tr from-red-400 to-rose-500'
-                : 'bg-gradient-to-tr from-indigo-500 to-purple-500'
-            ]"
-          >
-            {{ book.filename.slice(0, 1).toUpperCase() }}
-          </div>
-          <!-- Details -->
-          <div class="flex-1 min-w-0 pr-4">
-            <h4
-              class="text-xs font-bold truncate transition-colors"
-              :class="[
-                book.status === 'processing'
-                  ? 'text-amber-800'
-                  : book.status === 'failed'
-                  ? 'text-red-800'
-                  : 'text-zinc-800 group-hover:text-indigo-600'
-              ]"
-              :title="book.filename"
-            >
-              {{ book.filename }}
-            </h4>
-            <div class="flex items-center gap-2 mt-0.5 text-[10px] text-zinc-400">
-              <span>{{ formatSize(book.size) }}</span>
-              <span>•</span>
-              <span>{{ formatDate(book.createdAt) }}</span>
-            </div>
-
-            <!-- Status Indicator messages -->
-            <div v-if="book.status === 'processing'" class="flex items-center gap-1.5 mt-1 text-[10px] text-amber-600 font-medium">
-              <el-icon class="is-loading"><Loading /></el-icon>
-              <span>正在进行语义向量化解析...</span>
-            </div>
-            <div v-else-if="book.status === 'failed'" class="flex items-center gap-1 mt-1 text-[10px] text-red-500 font-semibold">
-              <span>❌ 向量化解析失败，请重新上传</span>
-            </div>
-            <div v-else class="flex items-center gap-1 mt-1 text-[10px] text-emerald-600 font-medium">
-              <span>✨ 精读资料已上架，可随时在聊天中引用</span>
-            </div>
-          </div>
-          <!-- Selection highlight line -->
-          <div
-            class="absolute left-0 top-0 bottom-0 w-[3px] transition-transform origin-top duration-300"
-            :class="[
-              book.status === 'processing'
-                ? 'bg-amber-400 scale-y-100'
-                : book.status === 'failed'
-                ? 'bg-red-400 scale-y-100'
-                : 'bg-emerald-500 scale-y-0 group-hover:scale-y-100'
-            ]"
-          ></div>
+      <!-- Upload dropzone -->
+      <div class="mt-4">
+        <input type="file" ref="fileInputRef" class="hidden" accept=".txt,.pdf" @change="handleFileChange" />
+        <div class="rounded-2xl p-5 flex flex-col items-center justify-center cursor-pointer group transition-all duration-300"
+            :style="{ background: 'var(--color-surface-hover)', border: '2px dashed var(--color-surface-border)' }"
+            style="hover:border-color: var(--color-accent)"
+            @click="triggerFileInput">
+          <span class="text-2xl group-hover:scale-110 transition-transform duration-300">📤</span>
+          <span class="text-xs font-semibold mt-2" style="color: var(--color-text-secondary)">点击上传精读电子书</span>
+          <span class="text-[10px] mt-1" style="color: var(--color-text-muted)">支持 TXT / PDF 格式</span>
         </div>
       </div>
-    </div>
+
+      <!-- Upload progress -->
+      <div v-if="uploadState.isUploading" class="mt-4 p-4 rounded-2xl"
+          :style="{ background: 'var(--color-surface)', border: '1px solid var(--color-accent)' }">
+        <div class="flex items-center justify-between text-xs mb-2">
+          <span class="font-semibold truncate max-w-[150px]" style="color: var(--color-text-primary)">{{ uploadState.filename }}</span>
+          <span class="font-bold" style="color: var(--color-accent)">{{ uploadState.progress }}%</span>
+        </div>
+        <el-progress :percentage="uploadState.progress" :show-text="false" status="success" />
+        <div class="text-[10px] mt-1.5" style="color: var(--color-text-muted)">{{ uploadState.statusText }}</div>
+      </div>
+
+      <!-- Book list -->
+      <div class="flex-1 overflow-y-auto mt-4 pr-1 custom-scrollbar">
+        <div v-if="loading" class="flex flex-col items-center justify-center h-48 gap-2">
+          <el-icon class="is-loading" :size="24" style="color: var(--color-text-muted)"><Loading /></el-icon>
+          <span class="text-xs" style="color: var(--color-text-muted)">正在载入书架...</span>
+        </div>
+        <div v-else-if="books.length === 0" class="flex flex-col items-center justify-center h-48 gap-2">
+          <span class="text-3xl grayscale opacity-60">📖</span>
+          <span class="text-xs" style="color: var(--color-text-muted)">书架空空如也</span>
+          <span class="text-[10px]" style="color: var(--color-text-muted)">上传精读材料开启 RAG 检索对练</span>
+        </div>
+        <div v-else class="flex flex-col gap-3">
+          <div
+            v-for="book in books" :key="book.id"
+            class="group p-4 rounded-2xl transition-all duration-300 flex gap-3 relative overflow-hidden cursor-pointer hover:-translate-y-0.5"
+            :style="book.status === 'processing'
+              ? { background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.3)' }
+              : book.status === 'failed'
+              ? { background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.3)' }
+              : { background: 'var(--color-surface)', border: '1px solid var(--color-surface-border)' }"
+            @click="handleBookClick(book)">
+
+            <!-- Delete -->
+            <div class="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+                @click.stop="handleDeleteBook(book)">
+              <el-tooltip content="从书架移除此资料" placement="top">
+                <span class="w-5 h-5 rounded-full bg-red-50 hover:bg-red-100 flex items-center justify-center text-[10px] text-red-500 shadow-sm cursor-pointer select-none transition-colors">🗑️</span>
+              </el-tooltip>
+            </div>
+
+            <!-- Cover -->
+            <div class="w-10 h-12 rounded-xl flex items-center justify-center text-white text-md font-bold shadow-sm select-none shrink-0"
+                :style="book.status === 'processing'
+                  ? { background: 'linear-gradient(135deg, #fbbf24, #f59e0b)' }
+                  : book.status === 'failed'
+                  ? { background: 'linear-gradient(135deg, #f87171, #ef4444)' }
+                  : { background: 'linear-gradient(135deg, #B8B0E8, #F4A4B0)' }">
+              {{ book.filename.slice(0, 1).toUpperCase() }}
+            </div>
+
+            <!-- Details -->
+            <div class="flex-1 min-w-0 pr-4">
+              <h4 class="text-xs font-bold truncate transition-colors"
+                  :style="book.status === 'processing'
+                    ? { color: '#92400e' }
+                    : book.status === 'failed'
+                    ? { color: '#991b1b' }
+                    : { color: 'var(--color-text-primary)' }"
+                  :title="book.filename">
+                {{ book.filename }}
+              </h4>
+              <div class="flex items-center gap-2 mt-0.5 text-[10px]" style="color: var(--color-text-muted)">
+                <span>{{ formatSize(book.size) }}</span>
+                <span>•</span>
+                <span>{{ formatDate(book.createdAt) }}</span>
+              </div>
+              <div v-if="book.status === 'processing'" class="flex items-center gap-1.5 mt-1 text-[10px] font-medium" style="color: #d97706">
+                <el-icon class="is-loading"><Loading /></el-icon>
+                <span>正在向量化解析...</span>
+              </div>
+              <div v-else-if="book.status === 'failed'" class="flex items-center gap-1 mt-1 text-[10px] font-semibold" style="color: #dc2626">
+                <span>❌ 解析失败，请重新上传</span>
+              </div>
+              <div v-else class="flex items-center gap-1 mt-1 text-[10px] font-medium" style="color: #059669">
+                <span>✨ 已上架，可在聊天中引用</span>
+              </div>
+            </div>
+
+            <!-- Active bar -->
+            <div class="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-2xl transition-transform origin-top duration-300"
+                :class="['processing', 'failed'].includes(book.status) ? 'scale-y-100' : 'scale-y-0 group-hover:scale-y-100'"
+                :style="book.status === 'processing'
+                  ? { background: '#fbbf24' }
+                  : book.status === 'failed'
+                  ? { background: '#f87171' }
+                  : { background: 'var(--color-accent)' }">
+            </div>
+          </div>
+        </div>
+      </div>
     </template>
   </div>
 </template>

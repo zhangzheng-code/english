@@ -1,12 +1,23 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/40 to-pink-50/50 text-neutral-800 font-sans selection:bg-purple-500 selection:text-white flex flex-col">
-        <Header />
-        <main class="flex-1 flex flex-col relative">
-            <Content />
-        </main>
-    </div>
+  <div
+    class="flex h-screen w-screen overflow-hidden"
+    :style="{ background: 'linear-gradient(135deg, var(--color-canvas-from), var(--color-canvas-to))' }"
+  >
+    <NavRail />
+    <main class="flex-1 ml-16 overflow-y-auto h-full">
+      <RouterView />
+      <Search />
+      <Login />
+    </main>
+  </div>
 </template>
+
 <script setup lang="ts">
-import Header from './Header/index.vue'
-import Content from './Content/index.vue'
-</script>
+import NavRail from './NavRail/index.vue'
+import { RouterView } from 'vue-router'
+import Search from '../components/Search/index.vue'
+import Login from '../components/Login/index.vue'
+import { provide, ref } from 'vue'
+import { IS_SHOW_LOGIN } from '../components/Login/type'
+provide(IS_SHOW_LOGIN, ref(false))
+</script>

@@ -1,35 +1,40 @@
 <template>
-    <div :class="isCollapsed ? 'w-[68px]' : 'w-[240px]'" class="bg-white/80 backdrop-blur-2xl rounded-3xl p-3 border border-purple-100/80 shadow-md transition-all duration-500 ease-out flex flex-col h-full shrink-0">
-        <!-- 头部导航与折叠开关 -->
-        <div class="flex items-center justify-between pb-3 mb-2 border-b border-purple-100/60 px-2" :class="{ 'justify-center': isCollapsed }">
+    <div :class="isCollapsed ? 'w-[68px]' : 'w-[240px]'"
+        class="rounded-3xl p-4 transition-all duration-500 ease-out flex flex-col h-full shrink-0"
+        style="background: rgba(255,255,255,0.70); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--color-surface-border); box-shadow: 0 4px 24px rgba(0,0,0,0.04);">
+
+        <div class="flex items-center justify-between pb-4 mb-3 px-1"
+            :class="{ 'justify-center': isCollapsed }"
+            :style="{ borderBottom: '1px solid var(--color-surface-border)' }">
             <div v-if="!isCollapsed" class="flex items-center gap-2 overflow-hidden">
                 <span class="text-base">🎭</span>
-                <span class="text-xs font-black bg-gradient-to-r from-purple-900 to-indigo-800 bg-clip-text text-transparent tracking-wide">AI 情境角色</span>
+                <span class="text-xs font-black tracking-wide" style="color: var(--color-text-primary)">AI 情境角色</span>
             </div>
-            <div @click="emits('toggleCollapse')" class="w-7 h-7 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-700 flex items-center justify-center cursor-pointer transition-transform duration-300 hover:scale-110 shadow-2xs select-none" :title="isCollapsed ? '展开角色栏' : '收起角色栏'">
+            <div @click="emits('toggleCollapse')"
+                class="w-7 h-7 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110 select-none"
+                :style="{ background: 'var(--color-surface-hover)', color: 'var(--color-text-muted)' }"
+                :title="isCollapsed ? '展开角色栏' : '收起角色栏'">
                 <span class="text-[10px] font-bold">{{ isCollapsed ? '▶' : '◀' }}</span>
             </div>
         </div>
 
-        <!-- 角色列表 -->
-        <div class="flex-1 overflow-y-auto space-y-1.5 pr-0.5 custom-scrollbar">
+        <div class="flex-1 overflow-y-auto space-y-2 pr-0.5 custom-scrollbar">
             <template v-for="value in chatMode" :key="value.id">
                 <el-tooltip :content="value.label" placement="right" :disabled="!isCollapsed">
-                    <div @click="changeActive(value)" 
-                        :class="[
-                            active === value.id 
-                                ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 text-white font-bold shadow-md shadow-purple-500/25 scale-[1.02]' 
-                                : 'text-neutral-700 hover:bg-purple-50/80 hover:text-purple-900',
-                            isCollapsed ? 'p-2.5 justify-center' : 'p-3 px-3.5 gap-3'
-                        ]"
+                    <div @click="changeActive(value)"
+                        :class="[isCollapsed ? 'p-2.5 justify-center' : 'p-3.5 px-4 gap-3', { 'hover:bg-[var(--color-surface-hover)]': active !== value.id }]"
+                        :style="active === value.id
+                            ? { background: 'var(--color-nav-active-bg)', color: 'var(--color-nav-active-icon)', boxShadow: '0 4px 12px rgba(0,0,0,0.12)' }
+                            : { color: 'var(--color-text-secondary)' }"
                         class="rounded-2xl transition-all duration-300 cursor-pointer select-none flex items-center">
-                        
-                        <div class="w-7 h-7 rounded-xl flex items-center justify-center text-xs font-black shrink-0 transition-transform"
-                            :class="active === value.id ? 'bg-white/20 text-white' : 'bg-purple-100/70 text-purple-700'">
+
+                        <div class="w-7 h-7 rounded-xl flex items-center justify-center text-xs font-black shrink-0"
+                            :style="active === value.id
+                                ? { background: 'rgba(255,255,255,0.2)', color: 'var(--color-nav-active-icon)' }
+                                : { background: 'var(--color-surface-hover)', color: 'var(--color-accent-strong)' }">
                             {{ value.label.slice(0, 1) }}
                         </div>
-
-                        <div v-if="!isCollapsed" class="text-xs truncate flex-1 tracking-tight">
+                        <div v-if="!isCollapsed" class="text-xs truncate flex-1 tracking-tight font-semibold">
                             {{ value.label }}
                         </div>
                     </div>
@@ -47,22 +52,20 @@ import { getChatMode } from '@/apis/chat';
 defineProps<{ isCollapsed?: boolean }>()
 const emits = defineEmits(['onGetRole', 'toggleCollapse'])
 
-const chatMode = ref<ChatModeList>([]) //消息模式列表
-const active = ref<string | null>(null) //当前激活的id
+const chatMode = ref<ChatModeList>([])
+const active = ref<string | null>(null)
 
-//切换消息模式
 const changeActive = (value: ChatMode) => {
     active.value = value.id
-    emits('onGetRole', value.role) //派发role
+    emits('onGetRole', value.role)
 }
 
-//获取消息模式列表
 const getChatModeList = async () => {
     const res = await getChatMode()
     chatMode.value = res.data
     if (res.data && res.data.length > 0) {
-        active.value = res.data[0].id //默认选中第一个
-        emits('onGetRole', res.data[0].role) //派发role
+        active.value = res.data[0].id
+        emits('onGetRole', res.data[0].role)
     }
 }
 

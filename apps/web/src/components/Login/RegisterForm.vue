@@ -1,7 +1,7 @@
 <template>
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">欢迎注册</h1>
-        <p class="text-gray-500 text-sm">请填写以下信息以完成注册</p>
+        <h1 class="text-3xl font-bold mb-2" style="color: var(--color-text-primary);">欢迎注册</h1>
+        <p class="text-sm" style="color: var(--color-text-secondary);">请填写以下信息以完成注册</p>
     </div>
     <el-form ref="formRef" :model="form" :rules="rules" label-width="80" label-position="top" class="space-y-6">
         <el-form-item  prop="name">
@@ -19,7 +19,7 @@
         </el-form-item>
         <el-form-item class="pt-4">
             <el-button type="primary" size="large"
-                class="w-full h-12 text-base font-semibold bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 border-0"
+                class="w-full h-12 text-base font-semibold border-0"
                 @click="handleRegister">
                 注册
             </el-button>

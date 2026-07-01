@@ -3,3 +3,78 @@
 html,body,#app{
   @apply h-full w-full;
 }
+
+/* ========================================
+   全局 Design Token — Morandi Palette
+   参考图反推：低饱和薰衣草 + 莫兰迪粉
+   ======================================== */
+:root {
+  /* Canvas 页面底层渐变 */
+  --color-canvas-from:    #FDF0F0;
+  --color-canvas-to:      #F0EEF8;
+
+  /* Surface 卡片/容器 */
+  --color-surface:        #FFFFFF;
+  --color-surface-border: #F0EEF8;
+  --color-surface-hover:  #FAFAFA;
+
+  /* Accent 强调色 */
+  --color-accent:         #B8B0E8;   /* 低饱和薰衣草紫 */
+  --color-accent-strong:  #0D0D0D;   /* 近黑，激活按钮 */
+  --color-accent-soft:    #F4A4B0;   /* 玫瑰粉，图表/徽章 */
+
+  /* Text 文字层级 */
+  --color-text-primary:   #111111;
+  --color-text-secondary: #666666;
+  --color-text-muted:     #AAAAAA;
+
+  /* NavRail 侧边导航 */
+  --color-nav-bg:         #FFFFFF;
+  --color-nav-border:     #F0EEF8;
+  --color-nav-active-bg:  #0D0D0D;
+  --color-nav-active-icon:#FFFFFF;
+  --color-nav-icon:       #666666;
+
+  /* Element Plus 主色覆盖 */
+  --el-color-primary:            #0D0D0D;
+  --el-color-primary-light-3:    #F0EEF8;
+  --el-color-primary-light-5:    #F5F3FF;
+  --el-color-primary-light-7:    #FAF8FF;
+  --el-color-primary-light-9:    #FDFCFF;
+  --el-border-radius-base:       12px;
+  --el-border-radius-round:      24px;
+}
+
+/* 深色模式 */
+.dark {
+  --color-canvas-from:    #0F0E17;
+  --color-canvas-to:      #1A1628;
+
+  --color-surface:        rgba(255,255,255,0.05);
+  --color-surface-solid:  #1A1628;  /* 新增：不透明实体背景 */
+  --color-surface-border: rgba(255,255,255,0.08);
+  --color-surface-hover:  rgba(255,255,255,0.08);
+
+  --color-accent:         #C4BCE8;
+  --color-accent-strong:  #FFFFFF;
+  --color-accent-soft:    #E8A0AF;
+
+  --color-text-primary:   #F5F5F5;
+  --color-text-secondary: #999999;
+  --color-text-muted:     #555555;
+
+  --color-nav-bg:         rgba(255,255,255,0.04);
+  --color-nav-border:     rgba(255,255,255,0.08);
+  --color-nav-active-bg:  #FFFFFF;
+  --color-nav-active-icon:#0D0D0D;
+  --color-nav-icon:       #888888;
+
+  --el-color-primary:            #FFFFFF;
+  --el-color-primary-light-3:    rgba(255,255,255,0.15);
+  --el-bg-color:                 #1A1628;
+  --el-bg-color-page:            #0F0E17;
+  --el-text-color-primary:       #F5F5F5;
+  --el-text-color-regular:       #AAAAAA;
+  --el-border-color:             rgba(255,255,255,0.10);
+  --el-fill-color-blank:         rgba(255,255,255,0.05);
+}

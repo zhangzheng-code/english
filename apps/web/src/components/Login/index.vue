@@ -1,19 +1,21 @@
 <template>
-    <div v-if="isShowLogin" class="fixed inset-0 bg-black opacity-30 filter blur-sm z-40"></div>
+    <div v-if="isShowLogin" class="fixed inset-0 opacity-30 filter blur-sm z-40" style="background: var(--color-accent-strong);"></div>
     <Transition name="fade">
         <div v-if="isShowLogin" class="fixed inset-30  flex items-center justify-center z-50">
-            <div class="w-[1200px] h-[700px] bg-white rounded-[20px] shadow-2xl overflow-hidden flex">
+            <div class="w-[1200px] h-[700px] rounded-[20px] shadow-2xl overflow-hidden flex" style="background: var(--color-surface);">
                 <!-- 左侧 3D 模型区域 -->
                 <ModelViewer @changeType="changeType" ref="modelViewerRef" />
 
                 <!-- 右侧登录表单区域 -->
-                <div class="flex-1 flex flex-col justify-center px-12 py-10 bg-white">
+                <div class="flex-1 flex flex-col justify-center px-12 py-10 login-form-container">
                     <LoginForm v-if="loginType === 'login'" />
                     <RegisterForm v-if="loginType === 'register'" />
                     <div class="mt-6 text-center">
-                        <div class="flex items-center justify-center gap-4 text-sm text-gray-500">
-                            <span class="cursor-pointer hover:text-indigo-600 transition-colors">忘记密码？</span>
-                            <span class="text-gray-300">|</span>
+                        <div class="flex items-center justify-center gap-4 text-sm" style="color: var(--color-text-muted);">
+                            <span class="cursor-pointer transition-colors" style="color: var(--color-text-muted);"
+                                @mouseenter="(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--color-accent)')"
+                                @mouseleave="(e) => ((e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)')">忘记密码？</span>
+                            <span style="color: var(--color-surface-border);">|</span>
                         </div>
                     </div>
                 </div>
@@ -52,5 +54,14 @@ window.addEventListener('keydown', (e) => {
 .fade-enter-from,
 .fade-leave-to {
     opacity: 0;
+}
+
+/* 登录表单容器：暗色模式强制不透明 */
+.login-form-container {
+    background: var(--color-surface);
+}
+
+.dark .login-form-container {
+    background: #1A1628;
 }
 </style>

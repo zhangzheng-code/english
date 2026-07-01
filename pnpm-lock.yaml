@@ -57,15 +57,24 @@ importers:
       '@en/tracker':
         specifier: workspace:*
         version: link:../tracker
+      '@lucide/vue':
+        specifier: ^1.22.0
+        version: 1.22.0(vue@3.5.34(typescript@5.3.3))
       '@microsoft/fetch-event-source':
         specifier: ^2.0.1
         version: 2.0.1
       '@tailwindcss/vite':
         specifier: ^4.1.18
         version: 4.3.0(vite@5.4.21(@types/node@18.19.130)(lightningcss@1.32.0)(terser@5.47.1))
+      '@vueuse/core':
+        specifier: ^14.3.0
+        version: 14.3.0(vue@3.5.34(typescript@5.3.3))
       axios:
         specifier: ^1.13.2
         version: 1.16.0
+      chart.js:
+        specifier: ^4.5.1
+        version: 4.5.1
       element-plus:
         specifier: ^2.13.0
         version: 2.14.0(vue@3.5.34(typescript@5.3.3))
@@ -96,6 +105,9 @@ importers:
       vue:
         specifier: ^3.3.11
         version: 3.5.34(typescript@5.3.3)
+      vue-chartjs:
+        specifier: ^5.3.3
+        version: 5.3.3(chart.js@4.5.1)(vue@3.5.34(typescript@5.3.3))
       vue-router:
         specifier: ^4.2.5
         version: 4.6.4(vue@3.5.34(typescript@5.3.3))
@@ -1262,6 +1274,11 @@ packages:
 
   '@langchain/protocol@0.0.15':
     resolution: {integrity: sha512-MllvbpMjqHevUm+v94M422mH7XKN+wGCvJRBVROTWBotEDOATYB4Ktk2UheYP859y9o2LlhtPek5t1T9eyfAbQ==}
+
+  '@lucide/vue@1.22.0':
+    resolution: {integrity: sha512-2/+mGF+NrHieiGTwq5wHRVsLhtzoY8x64ovvQkVYDXLrLHKqE/58xR/hveFsxkH0Ey4M8UsvsYNxAHjPgbTyqQ==}
+    peerDependencies:
+      vue: '>=3.0.1'
 
   '@lukeed/csprng@1.1.0':
     resolution: {integrity: sha512-Z7C/xXCiGWsg0KuKsHTKJxbWhpI3Vs5GwLfOean7MGyVFGqdRgBbAjOCh6u4bbjPc/8MJ2pZmK/0DLdCbivLDA==}
@@ -5548,6 +5565,12 @@ packages:
   vscode-uri@3.1.0:
     resolution: {integrity: sha512-/BpdSx+yCQGnCvecbyXdxHDkuk55/G3xwnC0GqY4gmQ3j+A+g8kzzgB4Nk/SINjqn6+waqw3EgbVF2QKExkRxQ==}
 
+  vue-chartjs@5.3.3:
+    resolution: {integrity: sha512-jqxtL8KZ6YJ5NTv6XzrzLS7osyegOi28UGNZW0h9OkDL7Sh1396ht4Dorh04aKrl2LiSalQ84WtqiG0RIJb0tA==}
+    peerDependencies:
+      chart.js: ^4.1.1
+      vue: ^3.0.0-0 || ^2.7.0
+
   vue-component-type-helpers@3.2.8:
     resolution: {integrity: sha512-9689efAXhN/EV86plgkL/XFiJSXhGtWPG6JDboZ+QnjlUWUUQrQ0ILKQtw4iQsuwIwu5k6Aw+JnehDe7161e7A==}
 
@@ -6686,6 +6709,10 @@ snapshots:
       - ws
 
   '@langchain/protocol@0.0.15': {}
+
+  '@lucide/vue@1.22.0(vue@3.5.34(typescript@5.3.3))':
+    dependencies:
+      vue: 3.5.34(typescript@5.3.3)
 
   '@lukeed/csprng@1.1.0': {}
 
@@ -11095,6 +11122,11 @@ snapshots:
       tsx: 4.21.0
 
   vscode-uri@3.1.0: {}
+
+  vue-chartjs@5.3.3(chart.js@4.5.1)(vue@3.5.34(typescript@5.3.3)):
+    dependencies:
+      chart.js: 4.5.1
+      vue: 3.5.34(typescript@5.3.3)
 
   vue-component-type-helpers@3.2.8: {}
 

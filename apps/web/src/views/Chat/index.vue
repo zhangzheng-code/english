@@ -1,5 +1,5 @@
 <template>
-    <div class="w-full max-w-[1440px] mx-auto px-6 mt-6 pb-8 flex gap-6 items-stretch h-[820px] relative">
+    <div class="w-full max-w-[1440px] mx-auto px-6 mt-6 pb-8 flex gap-6 items-stretch h-[calc(100vh-80px)] relative">
         <!-- 左侧可折叠会话人格栏 -->
         <Conversations 
             :isCollapsed="isLeftCollapsed" 
@@ -13,7 +13,6 @@
                 ref="bubbleRef" 
                 :list="list" 
                 @onSendMessage="sendMessage" 
-                @openOralModal="openOralModal"
             />
         </div>
 
@@ -25,9 +24,21 @@
         />
 
         <OralPracticeModal ref="oralModalRef" />
+
+        <!-- 固定 FAB 口语连麦按钮 -->
+        <div
+            @click="openOralModal"
+            class="fixed bottom-8 right-8 w-14 h-14 rounded-full flex items-center justify-center cursor-pointer shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 z-40 select-none oral-fab"
+            :style="{ background: 'var(--color-accent-strong)', color: 'var(--color-nav-active-icon)' }"
+            title="启动 AI 口语情境陪练"
+        >
+            <Mic :size="22" />
+        </div>
     </div>
 </template>
+
 <script setup lang="ts">
+import { Mic } from '@lucide/vue'
 import Conversations from './components/Conversations.vue';
 import Bubble from './components/Bubble.vue';
 import Bookshelf from './components/Bookshelf.vue';
@@ -85,9 +96,38 @@ const sendMessage = (message: string, deepThink: boolean, webSearch: boolean, im
         if(data.type === 'reasoning'){
             list.value[list.value.length - 1].reasoning += data.content
         }
-        if(data.type === 'chat'){   
+        if(data.type === 'chat'){
             list.value[list.value.length - 1].content += data.content
         }
     })
 }
 </script>
+
+<style scoped>
+/* FAB 口语按钮呼吸动画 */
+.oral-fab {
+    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-ring {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(13, 13, 13, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 12px rgba(13, 13, 13, 0);
+    }
+}
+
+.dark .oral-fab {
+    animation: pulse-ring-dark 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-ring-dark {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 12px rgba(255, 255, 255, 0);
+    }
+}
+</style>

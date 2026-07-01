@@ -1,23 +1,23 @@
 <template>
     <div class="mistake-challenge p-2 sm:p-4">
         <!-- 顶部通栏/闯关模式切换 -->
-        <div class="mb-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
-            <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+        <div class="mb-6 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden mistake-banner">
+            <div class="absolute -right-6 -bottom-6 w-32 h-32 rounded-full blur-xl pointer-events-none" style="background: rgba(184,176,232,0.2);"></div>
             <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur text-xs font-semibold mb-2">
                         <span>🔥 AI 智能特训场</span>
                     </div>
                     <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight">沉浸式错题闯关消杀</h2>
-                    <p class="text-xs sm:text-sm text-indigo-100 mt-1">攻克弱点，化茧成蝶，每消杀一个错题都是进步</p>
+                    <p class="text-xs sm:text-sm mt-1" style="color: rgba(244,164,176,0.9);">攻克弱点，化茧成蝶，每消杀一个错题都是进步</p>
                 </div>
                 <div class="flex items-center gap-2 self-end sm:self-auto flex-wrap">
                     <el-button size="small" type="warning" class="!rounded-full !px-3 font-bold shadow-sm" :loading="sendingReport" @click="handleSendReport">
                         📧 肉测发错词日报
                     </el-button>
                     <el-radio-group v-model="mode" size="small">
-                        <el-radio-button label="challenge">🎮 闯关模式</el-radio-button>
-                        <el-radio-button label="list">📋 列表概览</el-radio-button>
+                        <el-radio-button value="challenge">🎮 闯关模式</el-radio-button>
+                        <el-radio-button value="list">📋 列表概览</el-radio-button>
                     </el-radio-group>
                 </div>
             </div>
@@ -33,17 +33,17 @@
         <!-- 闯关模式 -->
         <div v-else-if="mode === 'challenge'" class="max-w-xl mx-auto">
             <div class="flex items-center justify-between mb-3 px-1 text-sm font-medium text-zinc-600">
-                <span>剩余关卡: <strong class="text-indigo-600 font-bold">{{ mistakes.length }}</strong> 题</span>
+                <span>剩余关卡: <strong class="font-bold" style="color: var(--color-accent);">{{ mistakes.length }}</strong> 题</span>
                 <span>第 {{ currentChallengeIndex + 1 }} / {{ mistakes.length }} 关</span>
             </div>
             <!-- 进度条 -->
             <div class="w-full bg-zinc-200 h-2 rounded-full mb-6 overflow-hidden">
-                <div class="bg-gradient-to-r from-indigo-500 to-pink-500 h-full transition-all duration-300"
+                <div class="h-full transition-all duration-300 mistake-progress"
                      :style="{ width: `${((currentChallengeIndex) / mistakes.length) * 100}%` }"></div>
             </div>
 
-            <div class="bg-white rounded-3xl border-2 border-indigo-100 shadow-xl p-6 sm:p-8 relative overflow-hidden text-center transition-all">
-                <div class="absolute top-4 right-4 text-xs font-bold px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full border border-indigo-100">
+            <div class="bg-white rounded-3xl shadow-xl p-6 sm:p-8 relative overflow-hidden text-center transition-all mistake-card">
+                <div class="absolute top-4 right-4 text-xs font-bold px-3 py-1 rounded-full mistake-badge">
                     BOSS 挑战
                 </div>
                 
@@ -56,10 +56,10 @@
                         <span v-if="currentWord?.phonetic" class="text-sm text-zinc-400 font-mono mt-1">{{ currentWord.phonetic }}</span>
                     </div>
                     <div class="mt-3 flex items-center justify-center gap-4 text-xs text-zinc-400">
-                        <button type="button" @click="isAnswerHidden = !isAnswerHidden" class="hover:text-indigo-600 transition-colors flex items-center gap-1 cursor-pointer">
+                        <button type="button" @click="isAnswerHidden = !isAnswerHidden" class="transition-colors flex items-center gap-1 cursor-pointer mistake-action-btn">
                             <span>{{ isAnswerHidden ? '👁️ 点击查看答案' : '🙈 隐藏答案' }}</span>
                         </button>
-                        <button v-if="currentWord?.word" type="button" @click="playAudio(currentWord.word)" class="hover:text-indigo-600 transition-colors flex items-center gap-1 cursor-pointer">
+                        <button v-if="currentWord?.word" type="button" @click="playAudio(currentWord.word)" class="transition-colors flex items-center gap-1 cursor-pointer mistake-action-btn">
                             <el-icon :size="14"><VideoPlay /></el-icon>
                             <span>播放发音</span>
                         </button>
@@ -264,3 +264,32 @@ onMounted(() => {
     fetchMistakes();
 });
 </script>
+
+<style scoped>
+/* 错题本莫兰迪配色 */
+.mistake-banner {
+    background: linear-gradient(135deg, #B8B0E8, #F4A4B0);
+}
+
+.mistake-progress {
+    background: linear-gradient(90deg, #B8B0E8, #F4A4B0);
+}
+
+.mistake-card {
+    border: 2px solid rgba(184, 176, 232, 0.2);
+}
+
+.mistake-badge {
+    background: rgba(184, 176, 232, 0.1);
+    color: #B8B0E8;
+    border: 1px solid rgba(184, 176, 232, 0.3);
+}
+
+.mistake-action-btn {
+    color: #AAAAAA;
+}
+
+.mistake-action-btn:hover {
+    color: #B8B0E8;
+}
+</style>
